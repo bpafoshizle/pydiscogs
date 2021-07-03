@@ -54,6 +54,6 @@ jobs:
         run: |
           pip install -r requirements.txt
 
-      - name: build image
+      - name: run tests
         run: |
           python -m unittest discover -v -s src
