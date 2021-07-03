@@ -23,3 +23,9 @@ Should be run in virtual environment
 ## Importing
 
 The name of the module to import is completely independent of the name of your package on pypi. The import name is ultimately derived from the name of the folder in which you house your source when you run the `python -m build` command.
+
+## Testing
+
+Run the following from the top level directory.
+
+`python -m unittest discover -v -s src`
