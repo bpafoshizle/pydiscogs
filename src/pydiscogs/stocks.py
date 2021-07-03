@@ -5,10 +5,9 @@ from datetime import datetime
 import aiohttp
 import discord
 from bs4 import BeautifulSoup
-
+from discord.ext import commands, tasks
 # from icecream import ic
 from pydiscogs.utils.timing import calc_tomorrow_7am, wait_until
-from discord.ext import commands, tasks
 
 logger = logging.getLogger(__name__)
 polygon_token = os.getenv("POLYGON_TOKEN")
