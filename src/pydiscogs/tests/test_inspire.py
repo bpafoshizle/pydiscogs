@@ -1,3 +1,8 @@
+""" test_inspire.py
+    testing
+
+   isort:skip_file
+"""
 import unittest
 from unittest import IsolatedAsyncioTestCase  # pylint: disable=no-name-in-module
 
