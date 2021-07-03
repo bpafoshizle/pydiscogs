@@ -87,5 +87,6 @@ class TestStockQuote(IsolatedAsyncioTestCase):
         self.assertTrue(isinstance(news, list))
         self.assertGreaterEqual(len(news), 5)
 
+
 if __name__ == "__main__":
     unittest.main()
