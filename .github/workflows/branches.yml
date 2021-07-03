@@ -58,5 +58,4 @@ jobs:
         run: |
           python -m unittest discover -v -s src
         env:
-          env:
-            POLYGON_TOKEN: ${{ secrets.POLYGON_TOKEN }}
+          POLYGON_TOKEN: ${{ secrets.POLYGON_TOKEN }}
