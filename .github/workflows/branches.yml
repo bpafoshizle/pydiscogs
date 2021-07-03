@@ -52,4 +52,4 @@ jobs:
 
       - name: build image
         run: |
-          python -m unittest discover -v tests
+          python -m unittest discover -v -s src
