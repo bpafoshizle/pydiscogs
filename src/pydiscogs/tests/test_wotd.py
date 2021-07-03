@@ -35,7 +35,7 @@ class TestWordOfTheDay(IsolatedAsyncioTestCase):
 
     async def test_get_word_of_the_day_returns_proper_response(self):
         """
-        Test that the function returns a valid non-empty proper response
+        Test that the function returns a proper response
         """
         events.append("test_get_word_of_the_day_returns_proper_response")
         (

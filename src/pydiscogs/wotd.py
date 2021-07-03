@@ -6,6 +6,7 @@ import aiohttp
 import discord
 from bs4 import BeautifulSoup
 from discord.ext import commands, tasks
+
 from pydiscogs.utils.timing import calc_tomorrow_6am, wait_until
 
 logger = logging.getLogger(__name__)
