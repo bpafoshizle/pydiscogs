@@ -5,7 +5,9 @@ from datetime import datetime
 import aiohttp
 import discord
 from bs4 import BeautifulSoup
-from cogs.utils.timing import calc_tomorrow_7am, wait_until
+
+# from icecream import ic
+from pydiscogs.utils.timing import calc_tomorrow_7am, wait_until
 from discord.ext import commands, tasks
 
 logger = logging.getLogger(__name__)
@@ -157,6 +159,7 @@ class StockQuote(commands.Cog):
             ) as r:
                 if r.status == 200:
                     json_data = await r.json()
+                    # ic(json_data)
                     logger.debug(json_data)
                     prev_close = json_data["results"][0]["c"]
                     prev_high = json_data["results"][0]["h"]
