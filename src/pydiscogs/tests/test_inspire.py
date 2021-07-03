@@ -6,8 +6,8 @@ from pydiscogs.inspire import InspireQuote
 
 events = []
 
-class TestInspireQuote(IsolatedAsyncioTestCase):
 
+class TestInspireQuote(IsolatedAsyncioTestCase):
     def setUp(self):
         self.bot = commands.Bot(command_prefix=".")
         self.inspire_cog = InspireQuote(self.bot)
@@ -35,5 +35,6 @@ class TestInspireQuote(IsolatedAsyncioTestCase):
         self.assertGreater(len(quote), 0)
         self.addAsyncCleanup(self.on_cleanup)
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     unittest.main()
