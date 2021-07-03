@@ -5,9 +5,6 @@ requires = [
 ]
 build-backend = "setuptools.build_meta"
 
-[tool.isort]
-profile = "black"
-
 [tool.pylint.messages_control]
 disable = "C0330, C0326"
 
