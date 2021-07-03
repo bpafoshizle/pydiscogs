@@ -4,6 +4,7 @@
    isort:skip_file
 """
 import unittest
+import asyncio
 from unittest import IsolatedAsyncioTestCase  # pylint: disable=no-name-in-module
 
 from discord.ext import commands
@@ -25,6 +26,7 @@ class TestInspireQuote(IsolatedAsyncioTestCase):
         events.append("tearDown")
 
     async def asyncTearDown(self):
+        await asyncio.sleep(0.1)  # https://github.com/aio-libs/aiohttp/issues/1115
         events.append("asyncTearDown")
 
     async def on_cleanup(self):
