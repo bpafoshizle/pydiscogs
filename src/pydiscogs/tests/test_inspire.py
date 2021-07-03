@@ -1,6 +1,6 @@
 import unittest
 from unittest import (
-    IsolatedAsyncioTestCase, # pylint: disable=no-name-in-module
+    IsolatedAsyncioTestCase,  # pylint: disable=no-name-in-module
 )  
 
 from discord.ext import commands
