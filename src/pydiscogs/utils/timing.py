@@ -7,7 +7,7 @@ us_central_tz = pytz.timezone("US/Central")
 
 
 async def wait_until(dt):
-    """ Sleep until the specified datetime. Expects UTC """
+    """Sleep until the specified datetime. Expects UTC"""
     now = datetime.now(timezone.utc)
     await asyncio.sleep((dt - now).total_seconds())
 
