@@ -35,7 +35,7 @@ This will test an individual file.
 `python -m unittest discover -v src -p 'test_stocks.py'`
 
 
-## Development WIP ##
+## Development WIP
 ```python
 twitch_client = twitchio.Client.from_client_credentials(
             client_id=os.getenv("TWITCH_BOT_CLIENT_ID"),

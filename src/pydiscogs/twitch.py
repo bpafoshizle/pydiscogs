@@ -1,6 +1,8 @@
 import logging
 import os
 from datetime import datetime
+from typing import List
+
 # from twitchio.ext import eventsub
 from pprint import pprint
 from uuid import UUID
@@ -8,6 +10,7 @@ from uuid import UUID
 import discord
 import twitchio
 from discord.ext import commands, tasks
+
 from pydiscogs.utils.timing import fmt_datetime_to_minute, naive_to_us_central
 
 logger = logging.getLogger(__name__)
@@ -154,7 +157,7 @@ class Twitch(commands.Cog):
         response = await self.client.fetch_users(username)
         return response[0].id, response[0].profile_image
 
-    async def get_user_data(self, users:str=join_channels):
+    async def get_user_data(self, users: List[str] = join_channels):
         return self.twitch_client.fetch_users(users)
 
     async def get_live_channels(self, query: str = "*"):
