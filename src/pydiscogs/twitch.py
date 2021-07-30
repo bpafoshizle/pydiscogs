@@ -1,7 +1,6 @@
 import logging
 import os
 from datetime import datetime
-
 # from twitchio.ext import eventsub
 from pprint import pprint
 from typing import List
