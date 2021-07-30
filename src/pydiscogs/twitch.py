@@ -1,21 +1,18 @@
 import logging
 import os
 from datetime import datetime
-
-import discord
-import twitchio
-from pydiscogs.utils.timing import fmt_datetime_to_minute, naive_to_us_central
-from discord.ext import commands, tasks
-
 # from twitchio.ext import eventsub
 from pprint import pprint
 from uuid import UUID
 
+import discord
+import twitchio
+from discord.ext import commands, tasks
+from pydiscogs.utils.timing import fmt_datetime_to_minute, naive_to_us_central
+
 logger = logging.getLogger(__name__)
 
 join_channels = ["bpafoshizle", "ephenry84", "elzblazin", "kuhouseii", "fwm_bot"]
-
-# [<User id=168197731 name=elzblazin display_name=elzblazin type=UserTypeEnum.none>, <User id=643319849 name=kuhouseii display_name=KuhouseII type=UserTypeEnum.none>, <User id=653518175 name=fwm_bot display_name=FWM_Bot type=UserTypeEnum.none>, <User id=108647345 name=bpafoshizle display_name=bpafoshizle type=UserTypeEnum.none>, <User id=235807313 name=ephenry84 display_name=ephenry84 type=UserTypeEnum.none>]
 
 followed_channels = [
     "JackFrags",
@@ -75,7 +72,7 @@ class Twitch(commands.Cog):
 
     @commands.command()
     async def twitch_getuser(self, ctx, user):
-        response = await self.get_user_data(user)
+        response = await self.get_user_data([user])
         logger.debug(response)
         await ctx.send(embed=self.formatUserInfoEmbed(response[0]))
 
@@ -102,7 +99,7 @@ class Twitch(commands.Cog):
     #     await ctx.send("Hai there!")
     #     await discord_gaming_chnl.send("oh hai there, discord")
 
-    def callback_whisper(uuid: UUID, data: dict) -> None:
+    def callback_whisper(self, uuid: UUID, data: dict) -> None:
         print("got callback for UUID " + str(uuid))
         pprint(data)
 
@@ -157,8 +154,8 @@ class Twitch(commands.Cog):
         response = await self.client.fetch_users(username)
         return response[0].id, response[0].profile_image
 
-    async def get_user_data(self):
-        return self.twitch_client.fetch_users(join_channels)
+    async def get_user_data(self, users:str=join_channels):
+        return self.twitch_client.fetch_users(users)
 
     async def get_live_channels(self, query: str = "*"):
         return await self.twitch_client.search_channels(query, live_only=True)
