@@ -1,10 +1,10 @@
 import logging
 import os
 from datetime import datetime
-from typing import List
 
 # from twitchio.ext import eventsub
 from pprint import pprint
+from typing import List
 from uuid import UUID
 
 import discord
