@@ -17,7 +17,6 @@ class TestWordOfTheDay(IsolatedAsyncioTestCase):
     def setUp(self):
         self.bot = commands.Bot(command_prefix=".")
         self.wotd_cog = WordOfTheDay(self.bot)
-        self.loop = asyncio.get_event_loop()
         events.append("setUp")
 
     async def asyncSetUp(self):

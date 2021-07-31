@@ -1,29 +1,24 @@
 import logging
 import os
 from datetime import datetime
+from pprint import pprint
+from typing import List
+from uuid import UUID
 
 import discord
-import twitchio as twio
-from cogs.utils.timing import fmt_datetime_to_minute, naive_to_us_central
+import twitchio
 from discord.ext import commands, tasks
-from twitchio.ext import commands as twitch_commands
+
+from pydiscogs.utils.timing import fmt_datetime_to_minute, naive_to_us_central
 
 logger = logging.getLogger(__name__)
 
-join_channels = [
-    "bpafoshizle",
-    "ephenry84",
-    "elzblazin",
-    "kuhouseii",
-]
+join_channels = ["bpafoshizle", "ephenry84", "elzblazin", "kuhouseii", "fwm_bot"]
 
 followed_channels = [
     "JackFrags",
     "TrueGameDataLive",
     "Stodeh",
-    "Jukeyz",
-    "Symfuhny",
-    "NICKMERCS",
 ]
 
 
@@ -31,45 +26,24 @@ class Twitch(commands.Cog):
     def __init__(self, bot):
         self.channel_states = self.init_channel_state(join_channels + followed_channels)
         self.discord_bot = bot
-        self.client = twio.Client(
+        self.user_data = None
+        self.twitch_client = twitchio.Client.from_client_credentials(
             client_id=os.getenv("TWITCH_BOT_CLIENT_ID"),
             client_secret=os.getenv("TWITCH_BOT_CLIENT_SECRET"),
         )
-        self.bot = twitch_commands.Bot(
-            # set up the bot
-            irc_token=os.getenv("TWITCH_CHAT_OAUTH_TOKEN"),
-            client_id=os.getenv("TWITCH_BOT_CLIENT_ID"),
-            nick=os.getenv("TWITCH_BOT_USERNAME"),
-            prefix="!",
-            initial_channels=join_channels,
-        )
 
-        self.discord_bot.loop.create_task(self.bot.start())
+        # self.discord_bot.loop.create_task(self.bot.start())
         # pylint: disable=no-member
         self.check_channels_live_task.start()
 
-        self.bot.listen("event_ready")(self.event_ready)
-        self.bot.listen("event_message")(self.event_message)
-        self.bot.listen("event_userstate")(self.event_userstate)
-        self.bot.listen("event_webhook")(self.event_webhook)
-        self.bot.command(name="sayhello")(self.sayhello)
+        # Can't use event sub without internet accessible https callback endpoint
+        # self.twitch_eventsub_client = eventsub.EventSubClient(
+        #     client=self.twitch_client,
+        #     webhook_secret=os.getenv("TWITCH_WEBHOOK_SECRET"),
+        #     callback_route="https://bpafoshizle.com/webhooks/callback"
+        # )
 
-    # TwitchIO event handlers
-    async def event_message(self, ctx):
-        logger.debug(ctx.content)
-        # make sure the bot ignores itself and the streamer
-        if ctx.author.name.lower() == os.environ["TWITCH_BOT_USERNAME"].lower():
-            return
-        await self.bot.handle_commands(ctx)
-
-    async def event_ready(self):
-        logger.info("Logged into Twitch %s", self.bot.nick)
-
-    async def event_userstate(self, user):
-        logger.info("event_userstate: %s", user)
-
-    async def event_webhook(self, data):
-        logger.info("event_webhook: %s", data)
+        # self.twitch_eventsub_client.subscribe_channel_stream_start(108647345)
 
     # Discord tasks and commands
     @tasks.loop(minutes=1)
@@ -77,32 +51,19 @@ class Twitch(commands.Cog):
         logger.debug("channel id %s", os.getenv("DSCRD_CHNL_GAMING"))
         chnl = self.discord_bot.get_channel(int(os.getenv("DSCRD_CHNL_GAMING")))
         logger.debug("Got channel %s", chnl)
-        response = await self.client.get_streams(
-            channels=join_channels + followed_channels
-        )
-        for liveuserdata in response:
-            logger.debug(liveuserdata)
-            userdata_user_name = liveuserdata["user_name"]
-            userdata_started_at = datetime.strptime(
-                liveuserdata["started_at"], "%Y-%m-%dT%H:%M:%SZ"
-            )
-            if (
-                self.channel_states[userdata_user_name]["started_at"]
-                < userdata_started_at
-            ):
-                self.channel_states[userdata_user_name][
-                    "started_at"
-                ] = userdata_started_at
-                profileuserdata = await self.client.get_users(liveuserdata["user_id"])
-                logger.info(profileuserdata)
-                await chnl.send(
-                    embed=self.formatUserLiveEmbed(liveuserdata, profileuserdata[0])
-                )
+        streams = await self.get_stream_data(channels=join_channels + followed_channels)
+        for stream in streams:
+            logger.debug(stream)
+            if self.channel_states[stream.user.name]["started_at"] < stream.started_at:
+                self.channel_states[stream.user.name]["started_at"] = stream.started_at
+                stream.user = stream.user.fetch()
+                logger.info(stream.user)
+                await chnl.send(embed=self.formatStreamEmbed(stream))
             else:
                 logger.info(
                     "User %s still streaming since %s",
-                    userdata_user_name,
-                    self.channel_states[userdata_user_name]["started_at"],
+                    stream.user.name,
+                    self.channel_states[stream.user.name]["started_at"],
                 )
 
     @check_channels_live_task.before_loop
@@ -111,72 +72,60 @@ class Twitch(commands.Cog):
         logger.info("check_channels_live_task.before_loop: bot ready")
 
     @commands.command()
-    async def twitch_checklive(self, ctx, channel=None):
-        channels = join_channels + followed_channels
-        if channel:
-            channels = [channel]
-        response = await self.client.get_streams(channels=channels)
-        logger.debug(response)
-        for liveuserdata in response:
-            profileuserdata = await self.client.get_users(liveuserdata["user_id"])
-            logger.info(profileuserdata)
-            await ctx.send(
-                embed=self.formatUserLiveEmbed(liveuserdata, profileuserdata[0])
-            )
-
-    @commands.command()
     async def twitch_getuser(self, ctx, user):
-        response = await self.client.get_users(user)
+        response = await self.get_user_data([user])
         logger.debug(response)
         await ctx.send(embed=self.formatUserInfoEmbed(response[0]))
 
-    @commands.command()
-    async def twitch_getfollowers(self, ctx, username):
-        userid, image_url = await self.info_from_name(username)
-        response = await self.client.get_followers(int(userid))
-        embed = self.formatFollowerInfoEmbed(
-            username, image_url, self.parseFollowers(response)
-        )
-        logger.debug(response)
-        await ctx.send(embed=embed)
+    # @commands.command()
+    # async def twitch_getfollowers(self, ctx, username):
+    #     userid, image_url = await self.info_from_name(username)
+    #     response = await self.client.get_followers(int(userid))
+    #     embed = self.formatFollowerInfoEmbed(
+    #         username, image_url, self.parseFollowers(response)
+    #     )
+    #     logger.debug(response)
+    #     await ctx.send(embed=embed)
 
     # TwitchIO command
-    async def sayhello(self, ctx):
-        logger.debug("Discord gaming channel ID: %s", os.getenv("DSCRD_CHNL_GAMING"))
-        logger.debug(
-            "Discord gaming channel: %s",
-            self.discord_bot.get_channel(int(os.getenv("DSCRD_CHNL_GAMING"))),
-        )
-        discord_gaming_chnl = self.discord_bot.get_channel(
-            int(os.getenv("DSCRD_CHNL_GAMING"))
-        )
-        await ctx.send("Hai there!")
-        await discord_gaming_chnl.send("oh hai there, discord")
+    # async def sayhello(self, ctx):
+    #     logger.debug("Discord gaming channel ID: %s", os.getenv("DSCRD_CHNL_GAMING"))
+    #     logger.debug(
+    #         "Discord gaming channel: %s",
+    #         self.discord_bot.get_channel(int(os.getenv("DSCRD_CHNL_GAMING"))),
+    #     )
+    #     discord_gaming_chnl = self.discord_bot.get_channel(
+    #         int(os.getenv("DSCRD_CHNL_GAMING"))
+    #     )
+    #     await ctx.send("Hai there!")
+    #     await discord_gaming_chnl.send("oh hai there, discord")
 
-    def init_channel_state(self, followed_channels):
+    def callback_whisper(self, uuid: UUID, data: dict) -> None:
+        print("got callback for UUID " + str(uuid))
+        pprint(data)
+
+    def init_channel_state(self, channels):
         channel_states = {}
-        for channel in followed_channels:
+        for channel in channels:
             channel_states[channel] = {
-                "started_at": datetime.strptime("1970-01-01", "%Y-%m-%d")
+                "started_at": datetime.strptime("1970-01-01", "%Y-%m-%d"),
             }
         return channel_states
 
-    def formatUserLiveEmbed(self, liveuserdata, profileuserdata):
+    def formatStreamEmbed(self, stream):
         embed = discord.Embed(
-            title=f"{liveuserdata['user_name']} is Live on Twitch!",
-            description=liveuserdata["title"],
+            title=f"{stream.user.display_name} is Live on Twitch!",
+            description=stream.title,
             color=0x9D2235,
         )
-        embed.add_field(name="Streaming", value=liveuserdata["game_name"])
+        embed.add_field(name="Streaming", value=stream.game_name)
         embed.add_field(
             name="Started at",
             value=fmt_datetime_to_minute(
-                naive_to_us_central(
-                    datetime.strptime(liveuserdata["started_at"], "%Y-%m-%dT%H:%M:%SZ")
-                ),
+                naive_to_us_central(stream.started_at),
             ),
         )
-        embed.set_image(url=profileuserdata.profile_image)
+        embed.set_image(url=stream.user.profile_image)
         return embed
 
     def formatUserInfoEmbed(self, userdata):
@@ -203,5 +152,14 @@ class Twitch(commands.Cog):
         return follower_list
 
     async def info_from_name(self, username):
-        response = await self.client.get_users(username)
+        response = await self.client.fetch_users(username)
         return response[0].id, response[0].profile_image
+
+    async def get_user_data(self, users: List[str] = join_channels):
+        return self.twitch_client.fetch_users(users)
+
+    async def get_live_channels(self, query: str = "*"):
+        return await self.twitch_client.search_channels(query, live_only=True)
+
+    async def get_stream_data(self, channels):
+        return await self.twitch_client.fetch_streams(user_logins=channels)

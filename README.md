@@ -29,3 +29,26 @@ The name of the module to import is completely independent of the name of your p
 Run the following from the top level directory.
 
 `python -m unittest discover -v -s src`
+
+This will test an individual file.
+
+`python -m unittest discover -v src -p 'test_stocks.py'`
+
+
+## Development WIP
+```python
+twitch_client = twitchio.Client.from_client_credentials(
+            client_id=os.getenv("TWITCH_BOT_CLIENT_ID"),
+            client_secret=os.getenv("TWITCH_BOT_CLIENT_SECRET"),
+        )
+
+twitch_eventsub_client = eventsub.EventSubClient(
+            client=twitch_client,
+            webhook_secret=os.getenv("TWITCH_WEBHOOK_SECRET"),
+            callback_route="https://bpafoshizle.com/webhooks/callback"
+        )
+        
+users = asyncio.run(twitch_client.fetch_users(join_channels))
+# [<User id=108647345 name=bpafoshizle display_name=bpafoshizle type=UserTypeEnum.none>, <User id=235807313 name=ephenry84 display_name=ephenry84 type=UserTypeEnum.none>, <User id=168197731 name=elzblazin display_name=elzblazin type=UserTypeEnum.none>, <User id=643319849 name=kuhouseii display_name=KuhouseII type=UserTypeEnum.none>, <User id=653518175 name=fwm_bot display_name=FWM_Bot type=UserTypeEnum.none>]
+response = asyncio.run(twitch_eventsub_client.subscribe_channel_stream_start(108647345))
+```

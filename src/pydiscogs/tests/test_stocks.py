@@ -19,7 +19,6 @@ class TestStockQuote(IsolatedAsyncioTestCase):
     def setUp(self):
         self.bot = commands.Bot(command_prefix=".")
         self.stock_cog = StockQuote(self.bot)
-        self.loop = asyncio.get_event_loop()
         events.append("setUp")
 
     async def asyncSetUp(self):
