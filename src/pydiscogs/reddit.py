@@ -4,7 +4,7 @@ import asyncpraw
 import discord
 from discord.ext import commands, tasks
 from gfycat.client import GfycatClient
-from icecream import ic
+# from icecream import ic
 
 from pydiscogs.utils.timing import calc_tomorrow_6am, wait_until
 
@@ -87,7 +87,7 @@ class Reddit(commands.Cog):
         embeds = []
         async for submission in submissions:
             await submission.subreddit.load()
-            ic(submission.subreddit)
+            # ic(submission.subreddit)
             embed = discord.Embed(
                 title=f"Top hot entry from {submission.subreddit.display_name}",
                 url=f"https://www.reddit.com{submission.permalink}",
