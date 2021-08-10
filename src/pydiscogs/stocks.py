@@ -1,6 +1,7 @@
 import logging
 import os
 from datetime import datetime
+from typing import List
 
 import aiohttp
 import discord
@@ -15,16 +16,9 @@ polygon_token = os.getenv("POLYGON_TOKEN")
 
 
 class StockQuote(commands.Cog):
-    def __init__(self, bot):
+    def __init__(self, bot, stock_list: List[str]):
         self.bot = bot
-        self.stock_list = [
-            "SPY",
-            "QQQ",
-            "GME",
-            "IJR",
-            "BTC-USD",
-            "ETC-USD",
-        ]
+        self.stock_list = stock_list
         # pylint: disable=no-member
         self.stock_morning_report_task.start()
 
