@@ -4,9 +4,11 @@ import asyncpraw
 import discord
 from discord.ext import commands, tasks
 from gfycat.client import GfycatClient
-# from icecream import ic
 
 from pydiscogs.utils.timing import calc_tomorrow_6am, wait_until
+
+# from icecream import ic
+
 
 logger = logging.getLogger(__name__)
 
