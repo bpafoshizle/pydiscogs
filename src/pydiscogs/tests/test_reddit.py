@@ -34,7 +34,7 @@ class TestReddit(IsolatedAsyncioTestCase):
             ["sexygirls", "battlefield"],
             os.getenv("GFYCAT_CLIENT_ID"),
             os.getenv("GFYCAT_CLIENT_SECRET"),
-            os.getenv("DSCRD_DEV_CHNL_GENERAL"),
+            os.getenv("DSCRD_CHNL_GENERAL"),
         )
         events.append("asyncSetUp")
 

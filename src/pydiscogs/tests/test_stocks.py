@@ -23,6 +23,7 @@ stock_list = [
     "ETC-USD",
 ]
 
+
 class TestStockQuote(IsolatedAsyncioTestCase):
     def setUp(self):
         self.bot = commands.Bot(command_prefix=".")
