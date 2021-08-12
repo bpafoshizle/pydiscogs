@@ -62,4 +62,10 @@ jobs:
           TWITCH_BOT_USERNAME: ${{ secrets.TWITCH_BOT_USERNAME }}
           TWITCH_BOT_CLIENT_ID: ${{ secrets.TWITCH_BOT_CLIENT_ID }}
           TWITCH_BOT_CLIENT_SECRET: ${{ secrets.TWITCH_BOT_CLIENT_SECRET }}
-          TWITCH_CHAT_OAUTH_TOKEN: ${{ secrets.TWITCH_CHAT_OAUTH_TOKEN }}
+          REDDIT_CLIENT_ID: ${{ secrets.REDDIT_CLIENT_ID }}
+          REDDIT_CLIENT_SECRET: ${{ secrets.REDDIT_CLIENT_SECRET }}
+          REDDIT_USERNAME: ${{ secrets.REDDIT_USERNAME }}
+          REDDIT_PASSWORD: ${{ secrets.REDDIT_PASSWORD }}
+          GFYCAT_CLIENT_ID: ${{ secrets.GFYCAT_CLIENT_ID }}
+          GFYCAT_CLIENT_SECRET: ${{ secrets.GFYCAT_CLIENT_SECRET }}
+          DSCRD_CHNL_GENERAL: ${{ secrets.DSCRD_CHNL_GENERAL }}

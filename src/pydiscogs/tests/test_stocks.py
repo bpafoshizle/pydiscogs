@@ -14,11 +14,20 @@ from pydiscogs.stocks import StockQuote
 
 events = []
 
+stock_list = [
+    "SPY",
+    "QQQ",
+    "GME",
+    "IJR",
+    "BTC-USD",
+    "ETC-USD",
+]
+
 
 class TestStockQuote(IsolatedAsyncioTestCase):
     def setUp(self):
         self.bot = commands.Bot(command_prefix=".")
-        self.stock_cog = StockQuote(self.bot)
+        self.stock_cog = StockQuote(self.bot, stock_list)
         events.append("setUp")
 
     async def asyncSetUp(self):
