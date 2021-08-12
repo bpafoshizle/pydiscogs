@@ -13,23 +13,27 @@ from pydiscogs.utils.timing import fmt_datetime_to_minute, naive_to_us_central
 
 logger = logging.getLogger(__name__)
 
-join_channels = ["bpafoshizle", "ephenry84", "elzblazin", "kuhouseii", "fwm_bot"]
-
-followed_channels = [
-    "JackFrags",
-    "TrueGameDataLive",
-    "Stodeh",
-]
-
 
 class Twitch(commands.Cog):
-    def __init__(self, bot):
-        self.channel_states = self.init_channel_state(join_channels + followed_channels)
+    def __init__(
+        self,
+        bot,
+        twitch_bot_client_id,
+        twitch_bot_client_secret,
+        discord_post_channel_id: int,
+        join_channels_list,
+        follow_channels_list,
+    ):
+        self.follow_channels_list = follow_channels_list
+        self.join_channels_list = join_channels_list
+        self.channel_states = self.init_channel_state(
+            join_channels_list + follow_channels_list
+        )
         self.discord_bot = bot
         self.user_data = None
+        self.discord_post_channel_id = discord_post_channel_id
         self.twitch_client = twitchio.Client.from_client_credentials(
-            client_id=os.getenv("TWITCH_BOT_CLIENT_ID"),
-            client_secret=os.getenv("TWITCH_BOT_CLIENT_SECRET"),
+            client_id=twitch_bot_client_id, client_secret=twitch_bot_client_secret
         )
 
         # self.discord_bot.loop.create_task(self.bot.start())
@@ -48,10 +52,12 @@ class Twitch(commands.Cog):
     # Discord tasks and commands
     @tasks.loop(minutes=1)
     async def check_channels_live_task(self):
-        logger.debug("channel id %s", os.getenv("DSCRD_CHNL_GAMING"))
-        chnl = self.discord_bot.get_channel(int(os.getenv("DSCRD_CHNL_GAMING")))
+        logger.debug("channel id %s", self.discord_post_channel_id)
+        chnl = self.discord_bot.get_channel(int(self.discord_post_channel_id))
         logger.debug("Got channel %s", chnl)
-        streams = await self.get_stream_data(channels=join_channels + followed_channels)
+        streams = await self.get_stream_data(
+            channels=self.join_channels_list + self.follow_channels_list
+        )
         for stream in streams:
             logger.debug(stream)
             if self.channel_states[stream.user.name]["started_at"] < stream.started_at:
@@ -155,7 +161,9 @@ class Twitch(commands.Cog):
         response = await self.client.fetch_users(username)
         return response[0].id, response[0].profile_image
 
-    async def get_user_data(self, users: List[str] = join_channels):
+    async def get_user_data(self, users: List[str] = None):
+        if not users:
+            users = self.join_channels_list
         return self.twitch_client.fetch_users(users)
 
     async def get_live_channels(self, query: str = "*"):
