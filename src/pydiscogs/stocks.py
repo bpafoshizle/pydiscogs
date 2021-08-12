@@ -1,5 +1,4 @@
 import logging
-import os
 from datetime import datetime
 from typing import List
 
@@ -12,13 +11,17 @@ from discord.ext import commands, tasks
 from pydiscogs.utils.timing import calc_tomorrow_7am, wait_until
 
 logger = logging.getLogger(__name__)
-polygon_token = os.getenv("POLYGON_TOKEN")
 
 
 class StockQuote(commands.Cog):
-    def __init__(self, bot, stock_list: List[str]):
+    def __init__(
+        self, bot, stock_list: List[str], polygon_token, discord_post_channel_id
+    ):
         self.bot = bot
         self.stock_list = stock_list
+        self.polygon_token = polygon_token
+        self.discord_post_channel_id = discord_post_channel_id
+
         # pylint: disable=no-member
         self.stock_morning_report_task.start()
 
@@ -54,8 +57,8 @@ class StockQuote(commands.Cog):
 
     @tasks.loop(hours=24)
     async def stock_morning_report_task(self):
-        logger.info("channel id %s", os.getenv("DSCRD_CHNL_MONEY"))
-        chnl = self.bot.get_channel(int(os.getenv("DSCRD_CHNL_MONEY")))
+        logger.info("channel id %s", self.discord_post_channel_id)
+        chnl = self.bot.get_channel(int(self.discord_post_channel_id))
         logger.info("Got channel %s", chnl)
         stock_news = self.formatStockNewsEmbed(await self.getLatestMarketWatch())
         for article in stock_news:
@@ -76,7 +79,7 @@ class StockQuote(commands.Cog):
     async def getStockNewsPolygon(self, symbol):
         async with aiohttp.ClientSession() as session:
             async with session.get(
-                f"https://api.polygon.io/v1/meta/symbols/{symbol}/news?perpage=5&page=1&apiKey={polygon_token}"
+                f"https://api.polygon.io/v1/meta/symbols/{symbol}/news?perpage=5&page=1&apiKey={self.polygon_token}"
             ) as r:
                 if r.status == 200:
                     news = await r.json()
@@ -149,7 +152,7 @@ class StockQuote(commands.Cog):
     async def getPrevClose(self, symbol):
         async with aiohttp.ClientSession() as session:
             async with session.get(
-                f"https://api.polygon.io/v2/aggs/ticker/{symbol}/prev?unadjusted=true&apiKey={polygon_token}"
+                f"https://api.polygon.io/v2/aggs/ticker/{symbol}/prev?unadjusted=true&apiKey={self.polygon_token}"
             ) as r:
                 if r.status == 200:
                     json_data = await r.json()

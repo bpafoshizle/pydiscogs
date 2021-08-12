@@ -3,8 +3,9 @@
 
    isort:skip_file
 """
-import unittest
 import asyncio
+import os
+import unittest
 
 # from icecream import ic
 from unittest import IsolatedAsyncioTestCase  # pylint: disable=no-name-in-module
@@ -27,7 +28,12 @@ stock_list = [
 class TestStockQuote(IsolatedAsyncioTestCase):
     def setUp(self):
         self.bot = commands.Bot(command_prefix=".")
-        self.stock_cog = StockQuote(self.bot, stock_list)
+        self.stock_cog = StockQuote(
+            self.bot,
+            stock_list,
+            os.getenv("POLYGON_TOKEN"),
+            os.getenv("DSCRD_CHNL_MONEY"),
+        )
         events.append("setUp")
 
     async def asyncSetUp(self):
