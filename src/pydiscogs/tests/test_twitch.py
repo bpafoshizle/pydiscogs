@@ -5,7 +5,9 @@
 """
 import asyncio
 import datetime
+import os
 import unittest
+
 import twitchio
 
 # from icecream import ic
@@ -16,11 +18,26 @@ from pydiscogs.twitch import Twitch
 
 events = []
 
+join_channels_list = ["bpafoshizle", "ephenry84", "elzblazin", "kuhouseii", "fwm_bot"]
+
+follow_channels_list = [
+    "JackFrags",
+    "TrueGameDataLive",
+    "Stodeh",
+]
+
 
 class TestTwitch(IsolatedAsyncioTestCase):
     def setUp(self):
         self.bot = commands.Bot(command_prefix=".")
-        self.twitch_cog = Twitch(self.bot)
+        self.twitch_cog = Twitch(
+            self.bot,
+            os.getenv("TWITCH_BOT_CLIENT_ID"),
+            os.getenv("TWITCH_BOT_CLIENT_SECRET"),
+            os.getenv("DSCRD_CHNL_GAMING"),
+            join_channels_list,
+            follow_channels_list,
+        )
         events.append("setUp")
 
     async def asyncSetUp(self):
