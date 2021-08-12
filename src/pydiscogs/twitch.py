@@ -1,5 +1,4 @@
 import logging
-import os
 from datetime import datetime
 from pprint import pprint
 from typing import List
