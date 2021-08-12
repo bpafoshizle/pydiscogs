@@ -26,15 +26,15 @@ class TestReddit(IsolatedAsyncioTestCase):
 
     async def asyncSetUp(self):
         self.reddit_cog = Reddit(
-            self.bot,
-            os.getenv("REDDIT_CLIENT_ID"),
-            os.getenv("REDDIT_CLIENT_SECRET"),
-            os.getenv("REDDIT_USERNAME"),
-            os.getenv("REDDIT_PASSWORD"),
-            ["sexygirls", "battlefield"],
-            os.getenv("GFYCAT_CLIENT_ID"),
-            os.getenv("GFYCAT_CLIENT_SECRET"),
-            os.getenv("DSCRD_CHNL_GENERAL"),
+            bot=self.bot,
+            reddit_client_id=os.getenv("REDDIT_CLIENT_ID"),
+            reddit_client_secret=os.reddit_client_secret("REDDIT_CLIENT_SECRET"),
+            reddit_username=os.getenv("REDDIT_USERNAME"),
+            reddit_password=os.getenv("REDDIT_PASSWORD"),
+            subreddit_list=["sexygirls", "battlefield"],
+            gfycat_client_id=os.getenv("GFYCAT_CLIENT_ID"),
+            gfycat_client_secret=os.getenv("GFYCAT_CLIENT_SECRET"),
+            discord_post_channel_id=os.getenv("DSCRD_CHNL_GENERAL")
         )
         events.append("asyncSetUp")
 
