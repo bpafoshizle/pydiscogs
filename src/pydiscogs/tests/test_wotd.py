@@ -3,8 +3,10 @@
 
    isort:skip_file
 """
-import unittest
 import asyncio
+import os
+import unittest
+
 from unittest import IsolatedAsyncioTestCase  # pylint: disable=no-name-in-module
 
 from discord.ext import commands
@@ -16,7 +18,7 @@ events = []
 class TestWordOfTheDay(IsolatedAsyncioTestCase):
     def setUp(self):
         self.bot = commands.Bot(command_prefix=".")
-        self.wotd_cog = WordOfTheDay(self.bot)
+        self.wotd_cog = WordOfTheDay(self.bot, os.getenv("DSCRD_CHNL_GENERAL"))
         events.append("setUp")
 
     async def asyncSetUp(self):
