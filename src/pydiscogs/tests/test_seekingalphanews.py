@@ -9,6 +9,7 @@ import os
 import unittest
 
 from typing import List, Dict
+
 # from icecream import ic
 from unittest import IsolatedAsyncioTestCase  # pylint: disable=no-name-in-module
 
@@ -16,6 +17,7 @@ from discord.ext import commands
 from pydiscogs.seekingalphanews import SeekingAlhpaNews
 
 events = []
+
 
 class TestStockQuote(IsolatedAsyncioTestCase):
     def setUp(self):
@@ -48,7 +50,7 @@ class TestStockQuote(IsolatedAsyncioTestCase):
         # ic(symbol, name, lastprice, change, quotetime)
         self.assertTrue(isinstance(news, List))
         self.assertGreater(len(news), 0)
-        
+
         article = news[0]
         self.assertTrue(isinstance(article, Dict))
         self.assertTrue(isinstance(article["timestamp"], str or datetime.datetime))
@@ -57,6 +59,7 @@ class TestStockQuote(IsolatedAsyncioTestCase):
         self.assertGreater(len(article["title"]), 0)
         self.assertTrue(isinstance(article["url"], str))
         self.assertGreater(len(article["url"]), 25)
+
 
 if __name__ == "__main__":
     unittest.main()
