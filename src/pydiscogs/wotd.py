@@ -1,6 +1,5 @@
 import logging
 import operator
-import os
 
 import aiohttp
 import discord
@@ -13,8 +12,9 @@ logger = logging.getLogger(__name__)
 
 
 class WordOfTheDay(commands.Cog):
-    def __init__(self, bot):
+    def __init__(self, bot, discord_post_channel_id):
         self.bot = bot
+        self.discord_post_channel_id = discord_post_channel_id
         # pylint: disable=no-member
         self.wotd_task.start()
 
@@ -25,8 +25,8 @@ class WordOfTheDay(commands.Cog):
 
     @tasks.loop(hours=24)
     async def wotd_task(self):
-        logger.info("channel id %s", os.getenv("DSCRD_CHNL_GENERAL"))
-        chnl = self.bot.get_channel(int(os.getenv("DSCRD_CHNL_GENERAL")))
+        logger.info("channel id %s", self.discord_post_channel_id)
+        chnl = self.bot.get_channel(int(self.discord_post_channel_id))
         logger.info("Got channel %s", chnl)
         await chnl.send(
             embed=self.format_wod_response_embed(*await self.get_word_of_the_day())
