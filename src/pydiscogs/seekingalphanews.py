@@ -1,19 +1,20 @@
 import logging
-import os
 from datetime import datetime
 
 import aiohttp
 import discord
 from bs4 import BeautifulSoup
-from cogs.utils.timing import calc_tomorrow_7am, wait_until
 from discord.ext import commands, tasks
+
+from pydiscogs.utils.timing import calc_tomorrow_7am, wait_until
 
 logger = logging.getLogger(__name__)
 
 
 class SeekingAlhpaNews(commands.Cog):
-    def __init__(self, bot):
+    def __init__(self, bot, discord_post_channel_id):
         self.bot = bot
+        self.discord_post_channel_id = discord_post_channel_id
         # pylint: disable=no-member
         self.morning_report_task.start()
 
@@ -31,8 +32,8 @@ class SeekingAlhpaNews(commands.Cog):
 
     @tasks.loop(hours=24)
     async def morning_report_task(self):
-        logger.debug("channel id %s", os.getenv("DSCRD_CHNL_MONEY"))
-        chnl = self.bot.get_channel(int(os.getenv("DSCRD_CHNL_MONEY")))
+        logger.debug("channel id %s", self.discord_post_channel_id)
+        chnl = self.bot.get_channel(int(self.discord_post_channel_id))
         logger.debug("Got channel %s", chnl)
         stock_news = self.formatSeekingAlphaNewsEmbed(await self.getMarketNews())
         for article in stock_news:
@@ -56,14 +57,6 @@ class SeekingAlhpaNews(commands.Cog):
             async with session.get("https://seekingalpha.com/market-news/all") as r:
                 if r.status == 200:
                     return self.parseMarketNews(await r.text())
-
-    async def getStockNews(self, symbol):
-        async with aiohttp.ClientSession() as session:
-            async with session.get(
-                f"https://seekingalpha.com/symbol/{symbol}/news"
-            ) as r:
-                if r.status == 200:
-                    return self.parseMarketWatch(await r.text())
 
     def parseMarketNews(self, responseText):
         soup = BeautifulSoup(responseText, features="html.parser")
