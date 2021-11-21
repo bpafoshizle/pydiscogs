@@ -165,7 +165,7 @@ class Twitch(commands.Cog):
             users = self.join_channels_list
         return self.twitch_client.fetch_users(users)
 
-    async def get_live_channels(self, query: str = "*"):
+    async def get_live_channels(self, query: str = "e"):
         return await self.twitch_client.search_channels(query, live_only=True)
 
     async def get_stream_data(self, channels):
