@@ -1,6 +1,5 @@
 import logging
-from datetime import datetime
-from datetime import timezone
+from datetime import datetime, timezone
 from pprint import pprint
 from typing import List
 from uuid import UUID

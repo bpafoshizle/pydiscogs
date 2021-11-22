@@ -41,8 +41,8 @@ class Reddit(commands.Cog):
         self.discord_post_channel_id = discord_post_channel_id
 
     @commands.command()
-    async def reddit_post(self, ctx, subreddit: str, posts: int = 1):
-        posts = await self.getTopEntries(subreddit=subreddit, limit=posts)
+    async def reddit_post(self, ctx, subreddit: str, limit: int = 1):
+        posts = await self.getTopEntries(subreddit=subreddit, limit=limit)
         for post in posts:
             logger.debug(post)
             await ctx.send(embed=post)
@@ -77,7 +77,7 @@ class Reddit(commands.Cog):
         subreddit = await self.reddit.subreddit(subreddit)
         submissions = []
         async for submission in subreddit.hot():  # use .new.stream() for endless polling
-            if submission.stickied == True:
+            if submission.stickied:
                 continue
             submissions.append(submission)
             if len(submissions) == limit:
