@@ -1,5 +1,6 @@
 import logging
 from datetime import datetime
+from datetime import timezone
 from pprint import pprint
 from typing import List
 from uuid import UUID
@@ -48,7 +49,7 @@ class Twitch(commands.Cog):
 
         # self.twitch_eventsub_client.subscribe_channel_stream_start(108647345)
 
-    # Discord tasks and commands
+    # Discord tasks and commandsnaive_to_us_central
     @tasks.loop(minutes=1)
     async def check_channels_live_task(self):
         logger.debug("channel id %s", self.discord_post_channel_id)
@@ -61,7 +62,7 @@ class Twitch(commands.Cog):
             logger.debug(stream)
             if self.channel_states[stream.user.name]["started_at"] < stream.started_at:
                 self.channel_states[stream.user.name]["started_at"] = stream.started_at
-                stream.user = stream.user.fetch()
+                stream.user = await stream.user.fetch()
                 logger.info(stream.user)
                 await chnl.send(embed=self.formatStreamEmbed(stream))
             else:
@@ -113,7 +114,9 @@ class Twitch(commands.Cog):
         channel_states = {}
         for channel in channels:
             channel_states[channel] = {
-                "started_at": datetime.strptime("1970-01-01", "%Y-%m-%d"),
+                "started_at": datetime.strptime("1970-01-01", "%Y-%m-%d").replace(
+                    tzinfo=timezone.utc
+                ),
             }
         return channel_states
 

@@ -41,8 +41,8 @@ class Reddit(commands.Cog):
         self.discord_post_channel_id = discord_post_channel_id
 
     @commands.command()
-    async def reddit_post(self, ctx, subreddit: str):
-        posts = await self.getTopEntry(subreddit=subreddit)
+    async def reddit_post(self, ctx, subreddit: str, posts: int = 1):
+        posts = await self.getTopEntries(subreddit=subreddit, limit=posts)
         for post in posts:
             logger.debug(post)
             await ctx.send(embed=post)
@@ -71,9 +71,18 @@ class Reddit(commands.Cog):
         logger.info("morning_posts_task.before_loop: waited until 7am")
 
     async def getTopEntry(self, subreddit):
+        return await self.getTopEntries(subreddit, 1)
+
+    async def getTopEntries(self, subreddit, limit):
         subreddit = await self.reddit.subreddit(subreddit)
-        submissions = subreddit.hot(limit=1)
-        return await self.formatEmbed(submissions)
+        submissions = []
+        async for submission in subreddit.hot():  # use .new.stream() for endless polling
+            if submission.stickied == True:
+                continue
+            submissions.append(submission)
+            if len(submissions) == limit:
+                break
+        return await self.formatEmbedList(submissions)
 
     def handlePostImageUrl(self, url):
         if "gfycat" in url:
@@ -85,18 +94,21 @@ class Reddit(commands.Cog):
         response = self.gfycat.query_gfy(gfyid)
         return response["gfyItem"]["content_urls"]["max5mbGif"]["url"]
 
-    async def formatEmbed(self, submissions):
+    async def formatEmbedList(self, submissions):
         embeds = []
-        async for submission in submissions:
+        for submission in submissions:
             await submission.subreddit.load()
             # ic(submission.subreddit)
-            embed = discord.Embed(
-                title=f"Top hot entry from {submission.subreddit.display_name}",
-                url=f"https://www.reddit.com{submission.permalink}",
-                color=0x9D2235,
-            )
-            embed.set_image(url=self.handlePostImageUrl(submission.url))
-            logger.info("URL: %s", submission.url)
-            embed.add_field(name="Name", value=submission.title)
-            embeds.append(embed)
+            embeds.append(self.formatEmbed(submission))
         return embeds
+
+    def formatEmbed(self, submission):
+        embed = discord.Embed(
+            title=f"Top hot entry from {submission.subreddit.display_name}",
+            url=f"https://www.reddit.com{submission.permalink}",
+            color=0x9D2235,
+        )
+        embed.set_image(url=self.handlePostImageUrl(submission.url))
+        logger.info("URL: %s", submission.url)
+        embed.add_field(name="Name", value=submission.title)
+        return embed
