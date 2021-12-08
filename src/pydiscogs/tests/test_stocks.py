@@ -59,6 +59,7 @@ class TestStockQuote(IsolatedAsyncioTestCase):
             name,
             lastprice,
             change,
+            pctchange,
             quotetime,
         ) = await self.stock_cog.getLatestStockQuote("VTSAX")
         # ic(symbol, name, lastprice, change, quotetime)
@@ -71,6 +72,8 @@ class TestStockQuote(IsolatedAsyncioTestCase):
         self.assertTrue(lastprice.isnumeric)
         self.assertTrue(isinstance(change, str))
         self.assertGreater(len(change), 0)
+        self.assertTrue(isinstance(pctchange, str))
+        self.assertGreater(len(pctchange), 0)
         self.assertTrue(isinstance(quotetime, str))
         self.assertGreater(len(quotetime), 0)
         self.addAsyncCleanup(self.on_cleanup)
