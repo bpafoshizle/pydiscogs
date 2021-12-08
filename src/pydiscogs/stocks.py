@@ -178,13 +178,20 @@ class StockQuote(commands.Cog):
                     lastprice = soup.find(
                         "fin-streamer", attrs={"data-field": "regularMarketPrice"}
                     )["value"]
-                    change = soup.find("fin-streamer", attrs={"data-field": "regularMarketChange"})["value"]
-                    pctchange = soup.find("fin-streamer", attrs={"data-field": "regularMarketChangePercent"})["value"]
+                    change = soup.find(
+                        "fin-streamer", attrs={"data-field": "regularMarketChange"}
+                    )["value"]
+                    pctchange = soup.find(
+                        "fin-streamer",
+                        attrs={"data-field": "regularMarketChangePercent"},
+                    )["value"]
                     quotetime = soup.find("div", id="quote-market-notice").string
 
                     return (symbol, name, lastprice, change, pctchange, quotetime)
 
-    def formatLatestStockQuoteEmbed(self, symbol, name, lastprice, change, pctchange, quotetime):
+    def formatLatestStockQuoteEmbed(
+        self, symbol, name, lastprice, change, pctchange, quotetime
+    ):
         embed = discord.Embed(
             title="Stock Latest Quote",
             description="Most recent quote from your friendly Egroup bot",
