@@ -101,7 +101,10 @@ class Reddit(commands.Cog):
             try:
                 return sub.preview["images"][0]["source"]["url"]
             except KeyError:
-                return "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=400&q=80"
+                return (
+                    "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?ixlib=rb-1.2.1&ixid"
+                    "=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=400&q=80"
+                )
 
     def getGfyCatGifUrl(self, gfyid):
         response = self.gfycat.query_gfy(gfyid)
