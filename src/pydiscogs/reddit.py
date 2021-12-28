@@ -47,6 +47,13 @@ class Reddit(commands.Cog):
             logger.debug(post)
             await ctx.send(embed=post)
 
+    @commands.command()
+    async def reddit_post_id(self, ctx, postId):
+        sub = await self.reddit.submission(id=postId)
+        post = self.formatEmbed(sub)
+        logger.debug(post)
+        await ctx.send(embed=post)
+
     @tasks.loop(hours=24)
     async def morning_posts_task(self):
         logger.debug("channel id %s", self.discord_post_channel_id)
@@ -84,11 +91,18 @@ class Reddit(commands.Cog):
                 break
         return await self.formatEmbedList(submissions)
 
-    def handlePostImageUrl(self, url):
-        if "gfycat" in url:
-            return self.getGfyCatGifUrl(url.rsplit("/", 1)[-1])
+    def handlePostImageUrl(self, sub):
+
+        imageExtTuple = ('.jpg', '.jpeg', '.png', '.gif', '.gifv', '.webm', '.mp4')
+        if "gfycat" in sub.url:
+            return self.getGfyCatGifUrl(sub.url.rsplit("/", 1)[-1])
+        elif sub.url.lower().endswith(imageExtTuple):
+            return sub.url
         else:
-            return url
+            try:
+                return sub.preview['images'][0]['source']['url']
+            except KeyError:
+                return 'https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=400&q=80'
 
     def getGfyCatGifUrl(self, gfyid):
         response = self.gfycat.query_gfy(gfyid)
@@ -108,7 +122,7 @@ class Reddit(commands.Cog):
             url=f"https://www.reddit.com{submission.permalink}",
             color=0x9D2235,
         )
-        embed.set_image(url=self.handlePostImageUrl(submission.url))
+        embed.set_image(url=self.handlePostImageUrl(submission))
         logger.info("URL: %s", submission.url)
         embed.add_field(name="Name", value=submission.title)
         return embed
