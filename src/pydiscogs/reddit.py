@@ -92,17 +92,16 @@ class Reddit(commands.Cog):
         return await self.formatEmbedList(submissions)
 
     def handlePostImageUrl(self, sub):
-
-        imageExtTuple = ('.jpg', '.jpeg', '.png', '.gif', '.gifv', '.webm', '.mp4')
+        imageExtTuple = (".jpg", ".jpeg", ".png", ".gif", ".gifv", ".webm", ".mp4")
         if "gfycat" in sub.url:
             return self.getGfyCatGifUrl(sub.url.rsplit("/", 1)[-1])
         elif sub.url.lower().endswith(imageExtTuple):
             return sub.url
         else:
             try:
-                return sub.preview['images'][0]['source']['url']
+                return sub.preview["images"][0]["source"]["url"]
             except KeyError:
-                return 'https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=400&q=80'
+                return "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=400&q=80"
 
     def getGfyCatGifUrl(self, gfyid):
         response = self.gfycat.query_gfy(gfyid)
