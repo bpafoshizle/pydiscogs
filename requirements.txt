@@ -1,4 +1,4 @@
-discord.py==1.7.3
+py-cord==1.7.3
 bs4==0.0.1
 pytz==2021.1
 git+https://github.com/TwitchIO/TwitchIO#egg=twitchio
