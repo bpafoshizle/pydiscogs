@@ -32,6 +32,7 @@ class TestTwitch(IsolatedAsyncioTestCase):
         self.bot = commands.Bot(command_prefix=".")
         self.twitch_cog = Twitch(
             self.bot,
+            None,
             os.getenv("TWITCH_BOT_CLIENT_ID"),
             os.getenv("TWITCH_BOT_CLIENT_SECRET"),
             os.getenv("DSCRD_CHNL_GAMING"),

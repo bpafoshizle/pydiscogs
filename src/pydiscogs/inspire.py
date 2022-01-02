@@ -3,8 +3,6 @@ import json
 import aiohttp
 from discord.ext import commands
 
-from pydiscogs.utils.decorator_override import pydiscog_slash_command
-
 
 class InspireQuote(commands.Cog):
     def __init__(self, bot, guild_ids=None):

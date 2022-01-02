@@ -30,6 +30,7 @@ class TestStockQuote(IsolatedAsyncioTestCase):
         self.bot = commands.Bot(command_prefix=".")
         self.stock_cog = StockQuote(
             self.bot,
+            None,
             stock_list,
             os.getenv("POLYGON_TOKEN"),
             os.getenv("DSCRD_CHNL_MONEY"),
