@@ -15,7 +15,7 @@ logger = logging.getLogger(__name__)
 
 class StockQuote(commands.Cog):
     def __init__(
-        self, bot, stock_list: List[str], polygon_token, discord_post_channel_id
+        self, bot, guild_ids, stock_list: List[str], polygon_token, discord_post_channel_id
     ):
         self.bot = bot
         self.stock_list = stock_list
@@ -24,36 +24,39 @@ class StockQuote(commands.Cog):
 
         # pylint: disable=no-member
         self.stock_morning_report_task.start()
+        
+        bot.slash_command(guild_ids=guild_ids)(self.stockquote)
+        bot.slash_command(guild_ids=guild_ids)(self.stockclose)
+        bot.slash_command(guild_ids=guild_ids)(self.stocknews)
+        bot.slash_command(guild_ids=guild_ids)(self.marketnews)
 
-    @commands.command()
+
+
     async def stockquote(self, ctx, symbol):
         stock_quote = self.formatLatestStockQuoteEmbed(
             *await self.getLatestStockQuote(symbol)
         )
-        await ctx.send(embed=stock_quote)
+        await ctx.respond(embed=stock_quote)
 
-    @commands.command()
     async def stockclose(self, ctx, symbol):
         stock_close = self.formatPrevCloseEmbed(
             *await self.getPrevClose(symbol.upper())
         )
-        await ctx.send(embed=stock_close)
+        await ctx.respond(embed=stock_close)
 
-    @commands.command()
     async def stocknews(self, ctx, symbol):
         stock_news = self.formatStockNewsEmbed(
             await self.getStockNewsMarketWatch(symbol)
         )
         for article in stock_news:
             logger.debug(article)
-            await ctx.send(embed=article)
+            await ctx.respond(embed=article)
 
-    @commands.command()
     async def marketnews(self, ctx):
         stock_news = self.formatStockNewsEmbed(await self.getLatestMarketWatch())
         for article in stock_news:
             logger.debug(article)
-            await ctx.send(embed=article)
+            await ctx.respond(embed=article)
 
     @tasks.loop(hours=24)
     async def stock_morning_report_task(self):
