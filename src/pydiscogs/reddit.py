@@ -1,6 +1,7 @@
 import logging
 
 import asyncpraw
+import discord
 from discord.ext import commands, tasks
 from gfycat.client import GfycatClient
 
@@ -16,6 +17,7 @@ class Reddit(commands.Cog):
     def __init__(
         self,
         bot,
+        guild_ids,
         reddit_client_id,
         reddit_client_secret,
         reddit_username,
@@ -39,19 +41,22 @@ class Reddit(commands.Cog):
         self.subreddit_list = subreddit_list
         self.discord_post_channel_id = discord_post_channel_id
 
-    @commands.command()
+        bot.slash_command(guild_ids=guild_ids)(self.reddit_post)
+        bot.slash_command(guild_ids=guild_ids)(self.reddit_post_id)
+
+
+
     async def reddit_post(self, ctx, subreddit: str, limit: int = 1):
         posts = await self.getTopEntries(subreddit=subreddit, limit=limit)
         for post in posts:
             logger.debug(post)
-            await ctx.send(embed=post)
+            await ctx.respond(embed=post)
 
-    @commands.command()
-    async def reddit_post_id(self, ctx, postId):
-        sub = await self.reddit.submission(id=postId)
+    async def reddit_post_id(self, ctx, post_id):
+        sub = await self.reddit.submission(id=post_id)
         post = self.formatEmbed(sub)
         logger.debug(post)
-        await ctx.send(embed=post)
+        await ctx.respond(embed=post)
 
     @tasks.loop(hours=24)
     async def morning_posts_task(self):
@@ -99,7 +104,7 @@ class Reddit(commands.Cog):
         else:
             try:
                 return sub.preview["images"][0]["source"]["url"]
-            except KeyError:
+            except (KeyError, AttributeError):
                 return (
                     "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?ixlib=rb-1.2.1&ixid"
                     "=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=400&q=80"

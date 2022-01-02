@@ -12,16 +12,17 @@ logger = logging.getLogger(__name__)
 
 
 class WordOfTheDay(commands.Cog):
-    def __init__(self, bot, discord_post_channel_id):
+    def __init__(self, bot, guild_ids, discord_post_channel_id):
         self.bot = bot
         self.discord_post_channel_id = discord_post_channel_id
         # pylint: disable=no-member
         self.wotd_task.start()
 
-    @commands.command()
+        bot.slash_command(guild_ids=guild_ids)(self.wotd)
+
     async def wotd(self, ctx):
         wod = self.format_wod_response_embed(*await self.get_word_of_the_day())
-        await ctx.send(embed=wod)
+        await ctx.respond(embed=wod)
 
     @tasks.loop(hours=24)
     async def wotd_task(self):

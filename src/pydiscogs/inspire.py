@@ -9,9 +9,8 @@ from pydiscogs.utils.decorator_override import pydiscog_slash_command
 class InspireQuote(commands.Cog):
     def __init__(self, bot, guild_ids=None):
         self.bot = bot
-        bot.add_application_command(bot.slash_command(guild_ids=guild_ids)(self.inspire))
+        bot.slash_command(guild_ids=guild_ids)(self.inspire)
 
-    #@pydiscog_slash_command()
     async def inspire(self, ctx):
         await ctx.respond(await self.get_quote())
 
