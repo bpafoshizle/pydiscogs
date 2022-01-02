@@ -3,14 +3,17 @@ import json
 import aiohttp
 from discord.ext import commands
 
+from pydiscogs.utils.decorator_override import pydiscog_slash_command
+
 
 class InspireQuote(commands.Cog):
-    def __init__(self, bot):
+    def __init__(self, bot, guild_ids=None):
         self.bot = bot
+        bot.add_application_command(bot.slash_command(guild_ids=guild_ids)(self.inspire))
 
-    @commands.command()
+    #@pydiscog_slash_command()
     async def inspire(self, ctx):
-        await ctx.send(await self.get_quote())
+        await ctx.respond(await self.get_quote())
 
     async def get_quote(self):
         async with aiohttp.ClientSession() as session:

@@ -1,7 +1,6 @@
 import logging
 
 import asyncpraw
-import discord
 from discord.ext import commands, tasks
 from gfycat.client import GfycatClient
 
