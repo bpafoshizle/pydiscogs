@@ -5,12 +5,12 @@ from discord.ext import commands
 
 
 class InspireQuote(commands.Cog):
-    def __init__(self, bot):
+    def __init__(self, bot, guild_ids=None):
         self.bot = bot
+        bot.slash_command(guild_ids=guild_ids)(self.inspire)
 
-    @commands.command()
     async def inspire(self, ctx):
-        await ctx.send(await self.get_quote())
+        await ctx.respond(await self.get_quote())
 
     async def get_quote(self):
         async with aiohttp.ClientSession() as session:

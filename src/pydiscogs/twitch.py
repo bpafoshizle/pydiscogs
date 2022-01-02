@@ -17,6 +17,7 @@ class Twitch(commands.Cog):
     def __init__(
         self,
         bot,
+        guild_ids,
         twitch_bot_client_id,
         twitch_bot_client_secret,
         discord_post_channel_id: int,
@@ -35,7 +36,6 @@ class Twitch(commands.Cog):
             client_id=twitch_bot_client_id, client_secret=twitch_bot_client_secret
         )
 
-        # self.discord_bot.loop.create_task(self.bot.start())
         # pylint: disable=no-member
         self.check_channels_live_task.start()
 
@@ -47,6 +47,8 @@ class Twitch(commands.Cog):
         # )
 
         # self.twitch_eventsub_client.subscribe_channel_stream_start(108647345)
+
+        bot.slash_command(guild_ids=guild_ids)(self.twitch_getuser)
 
     # Discord tasks and commandsnaive_to_us_central
     @tasks.loop(minutes=1)
@@ -76,11 +78,10 @@ class Twitch(commands.Cog):
         await self.discord_bot.wait_until_ready()
         logger.info("check_channels_live_task.before_loop: bot ready")
 
-    @commands.command()
     async def twitch_getuser(self, ctx, user):
         response = await self.get_user_data([user])
         logger.debug(response)
-        await ctx.send(embed=self.formatUserInfoEmbed(response[0]))
+        await ctx.respond(embed=self.formatUserInfoEmbed(response[0]))
 
     # @commands.command()
     # async def twitch_getfollowers(self, ctx, username):
@@ -165,7 +166,7 @@ class Twitch(commands.Cog):
     async def get_user_data(self, users: List[str] = None):
         if not users:
             users = self.join_channels_list
-        return self.twitch_client.fetch_users(users)
+        return await self.twitch_client.fetch_users(users)
 
     async def get_live_channels(self, query: str = "e"):
         return await self.twitch_client.search_channels(query, live_only=True)
