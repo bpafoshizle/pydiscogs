@@ -81,7 +81,7 @@ class Twitch(commands.Cog):
     async def twitch_getuser(self, ctx, user):
         response = await self.get_user_data([user])
         logger.debug(response)
-        await ctx.send(embed=self.formatUserInfoEmbed(response[0]))
+        await ctx.respond(embed=self.formatUserInfoEmbed(response[0]))
 
     # @commands.command()
     # async def twitch_getfollowers(self, ctx, username):

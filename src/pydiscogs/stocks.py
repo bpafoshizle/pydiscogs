@@ -15,7 +15,12 @@ logger = logging.getLogger(__name__)
 
 class StockQuote(commands.Cog):
     def __init__(
-        self, bot, guild_ids, stock_list: List[str], polygon_token, discord_post_channel_id
+        self,
+        bot,
+        guild_ids,
+        stock_list: List[str],
+        polygon_token,
+        discord_post_channel_id,
     ):
         self.bot = bot
         self.stock_list = stock_list
@@ -24,13 +29,11 @@ class StockQuote(commands.Cog):
 
         # pylint: disable=no-member
         self.stock_morning_report_task.start()
-        
+
         bot.slash_command(guild_ids=guild_ids)(self.stockquote)
         bot.slash_command(guild_ids=guild_ids)(self.stockclose)
         bot.slash_command(guild_ids=guild_ids)(self.stocknews)
         bot.slash_command(guild_ids=guild_ids)(self.marketnews)
-
-
 
     async def stockquote(self, ctx, symbol):
         stock_quote = self.formatLatestStockQuoteEmbed(

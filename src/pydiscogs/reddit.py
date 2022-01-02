@@ -44,8 +44,6 @@ class Reddit(commands.Cog):
         bot.slash_command(guild_ids=guild_ids)(self.reddit_post)
         bot.slash_command(guild_ids=guild_ids)(self.reddit_post_id)
 
-
-
     async def reddit_post(self, ctx, subreddit: str, limit: int = 1):
         posts = await self.getTopEntries(subreddit=subreddit, limit=limit)
         for post in posts:
