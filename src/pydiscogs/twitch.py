@@ -21,8 +21,8 @@ class Twitch(commands.Cog):
         twitch_bot_client_id,
         twitch_bot_client_secret,
         discord_post_channel_id: int,
-        join_channels_list = [],
-        follow_channels_list = [],
+        join_channels_list=[],
+        follow_channels_list=[],
     ):
         self.follow_channels_list = follow_channels_list
         self.join_channels_list = join_channels_list
@@ -54,17 +54,20 @@ class Twitch(commands.Cog):
     @tasks.loop(minutes=1)
     async def check_channels_live_task(self):
         channels = self.join_channels_list + self.follow_channels_list
-        if(channels):
+        if channels:
             logger.debug("channel id %s", self.discord_post_channel_id)
             chnl = self.discord_bot.get_channel(int(self.discord_post_channel_id))
             logger.debug("Got channel %s", chnl)
-            streams = await self.get_stream_data(
-                channels=channels
-            )
+            streams = await self.get_stream_data(channels=channels)
             for stream in streams:
                 logger.debug(stream)
-                if self.channel_states[stream.user.name]["started_at"] < stream.started_at:
-                    self.channel_states[stream.user.name]["started_at"] = stream.started_at
+                if (
+                    self.channel_states[stream.user.name]["started_at"]
+                    < stream.started_at
+                ):
+                    self.channel_states[stream.user.name][
+                        "started_at"
+                    ] = stream.started_at
                     stream.user = await stream.user.fetch()
                     logger.info(stream.user)
                     await chnl.send(embed=self.formatStreamEmbed(stream))
