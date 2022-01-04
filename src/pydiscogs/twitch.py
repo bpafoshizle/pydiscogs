@@ -21,8 +21,8 @@ class Twitch(commands.Cog):
         twitch_bot_client_id,
         twitch_bot_client_secret,
         discord_post_channel_id: int,
-        join_channels_list,
-        follow_channels_list,
+        join_channels_list=[],
+        follow_channels_list=[],
     ):
         self.follow_channels_list = follow_channels_list
         self.join_channels_list = join_channels_list
@@ -53,25 +53,30 @@ class Twitch(commands.Cog):
     # Discord tasks and commandsnaive_to_us_central
     @tasks.loop(minutes=1)
     async def check_channels_live_task(self):
-        logger.debug("channel id %s", self.discord_post_channel_id)
-        chnl = self.discord_bot.get_channel(int(self.discord_post_channel_id))
-        logger.debug("Got channel %s", chnl)
-        streams = await self.get_stream_data(
-            channels=self.join_channels_list + self.follow_channels_list
-        )
-        for stream in streams:
-            logger.debug(stream)
-            if self.channel_states[stream.user.name]["started_at"] < stream.started_at:
-                self.channel_states[stream.user.name]["started_at"] = stream.started_at
-                stream.user = await stream.user.fetch()
-                logger.info(stream.user)
-                await chnl.send(embed=self.formatStreamEmbed(stream))
-            else:
-                logger.info(
-                    "User %s still streaming since %s",
-                    stream.user.name,
-                    self.channel_states[stream.user.name]["started_at"],
-                )
+        channels = self.join_channels_list + self.follow_channels_list
+        if channels:
+            logger.debug("channel id %s", self.discord_post_channel_id)
+            chnl = self.discord_bot.get_channel(int(self.discord_post_channel_id))
+            logger.debug("Got channel %s", chnl)
+            streams = await self.get_stream_data(channels=channels)
+            for stream in streams:
+                logger.debug(stream)
+                if (
+                    self.channel_states[stream.user.name]["started_at"]
+                    < stream.started_at
+                ):
+                    self.channel_states[stream.user.name][
+                        "started_at"
+                    ] = stream.started_at
+                    stream.user = await stream.user.fetch()
+                    logger.info(stream.user)
+                    await chnl.send(embed=self.formatStreamEmbed(stream))
+                else:
+                    logger.info(
+                        "User %s still streaming since %s",
+                        stream.user.name,
+                        self.channel_states[stream.user.name]["started_at"],
+                    )
 
     @check_channels_live_task.before_loop
     async def before(self):
