@@ -1,0 +1,45 @@
+discordToken: !ENV ${DISCORD_TOKEN}
+guildIds:
+  - !ENV ${DISCORD_GUILD_ID}
+commandPrefix: "."
+logLevel: !ENV ${LOGLEVEL}
+
+cogs:
+  - name: inspire
+  - name: wotd
+    propertiies:
+      postChannelId: !ENV ${DSCRD_CHNL_GENERAL}
+  - name: stocks
+    properties: 
+      stockList:
+        - SPY
+        - QQQ
+        - GME
+        - IJR
+        - BTC-USD
+        - ETC-USD
+      polygonToken: !ENV ${POLYGON_TOKEN}
+      postChannelId: !ENV ${DSCRD_CHNL_MONEY}
+  - name: twitch
+    properties:
+      - twitchClientID: !ENV ${TWITCH_BOT_CLIENT_ID}
+      - twitchClientSecret: !ENV ${TWITCH_BOT_CLIENT_SECRET}
+      - joinChannelList:
+        - bpafoshizle
+        - ephenry84
+        - elzblazin
+        - kuhouseii
+      - postChannelId: !ENV ${DSCRD_CHNL_GAMING}
+  - name: reddit
+    properties: 
+      - redditClient: !ENV ${REDDIT_CLIENT_ID}
+      - redditSecret: !ENV ${REDDIT_CLIENT_SECRET}
+      - redditUsername: !ENV ${REDDIT_USERNAME}
+      - redditPassword: !ENV ${REDDIT_PASSWORD}
+      - subRedditList: 
+        - getmotivated
+        - todayilearned
+        - interestingasfuck
+      - gfycatClientId: !ENV ${GFYCAT_CLIENT_ID}
+      - gfycatClientSecret: !ENV ${GFYCAT_CLIENT_SECRET}
+      - postChannelId: !ENV ${DSCRD_CHNL_GENERAL}
