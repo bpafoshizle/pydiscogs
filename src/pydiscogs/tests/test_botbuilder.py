@@ -16,10 +16,11 @@ from pydiscogs.cogs.reddit import Reddit
 
 logging.disable(logging.CRITICAL)
 
+
 class TestBotBuilder(unittest.TestCase):
     def setUp(self):
-        warnings.simplefilter('ignore', category=DeprecationWarning)
-        self.bot = botbuilder.build_bot('testbot.yaml')
+        warnings.simplefilter("ignore", category=DeprecationWarning)
+        self.bot = botbuilder.build_bot("testbot.yaml")
 
     def test_InspireQuote_cog_created(self):
         cog = self.bot.cogs.get("InspireQuote")
@@ -40,6 +41,7 @@ class TestBotBuilder(unittest.TestCase):
     def test_Reddit_cog_created(self):
         cog = self.bot.cogs.get("Reddit")
         self.assertTrue(isinstance(cog, Reddit))
+
 
 if __name__ == "__main__":
     unittest.main()
