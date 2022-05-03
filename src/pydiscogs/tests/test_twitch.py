@@ -14,7 +14,7 @@ import twitchio
 from unittest import IsolatedAsyncioTestCase  # pylint: disable=no-name-in-module
 
 from discord.ext import commands
-from pydiscogs.twitch import Twitch
+from pydiscogs.cogs.twitch import Twitch
 
 events = []
 

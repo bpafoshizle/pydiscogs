@@ -11,7 +11,7 @@ import unittest
 from unittest import IsolatedAsyncioTestCase  # pylint: disable=no-name-in-module
 
 from discord.ext import commands
-from pydiscogs.stocks import StockQuote
+from pydiscogs.cogs.stocks import StockQuote
 
 events = []
 
