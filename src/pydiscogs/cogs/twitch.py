@@ -7,6 +7,7 @@ from uuid import UUID
 import discord
 import twitchio
 from discord.ext import commands, tasks
+
 from pydiscogs.utils.timing import fmt_datetime_to_minute, naive_to_us_central
 
 logger = logging.getLogger(__name__)

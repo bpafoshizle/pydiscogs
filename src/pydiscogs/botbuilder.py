@@ -3,6 +3,7 @@ import os
 
 from discord.ext import commands
 from pyaml_env import parse_config
+
 from pydiscogs.cogs.inspire import InspireQuote
 from pydiscogs.cogs.reddit import Reddit
 from pydiscogs.cogs.stocks import StockQuote
