@@ -6,7 +6,6 @@ import aiohttp
 import discord
 from bs4 import BeautifulSoup
 from discord.ext import commands, tasks
-
 # from icecream import ic
 from pydiscogs.utils.timing import calc_tomorrow_7am, wait_until
 
