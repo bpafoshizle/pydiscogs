@@ -14,7 +14,7 @@ from unittest import IsolatedAsyncioTestCase  # pylint: disable=no-name-in-modul
 
 from discord.embeds import Embed
 from discord.ext import commands
-from pydiscogs.reddit import Reddit
+from pydiscogs.cogs.reddit import Reddit
 
 events = []
 
