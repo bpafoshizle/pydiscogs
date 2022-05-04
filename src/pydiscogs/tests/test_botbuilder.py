@@ -20,7 +20,7 @@ logging.disable(logging.CRITICAL)
 class TestBotBuilder(unittest.TestCase):
     def setUp(self):
         warnings.simplefilter("ignore", category=DeprecationWarning)
-        self.bot = botbuilder.build_bot("testbot.yaml")
+        self.bot = botbuilder.build_bot("./src/pydiscogs/tests/testbot.yaml")
 
     def test_InspireQuote_cog_created(self):
         cog = self.bot.cogs.get("InspireQuote")
