@@ -9,7 +9,7 @@ from discord.ext import commands, tasks
 from pydiscogs.utils.timing import calc_tomorrow_6am, wait_until
 
 logger = logging.getLogger(__name__)
-
+DORUKYUM_PARAM_REASON = "https://github.com/Pycord-Development/pycord/issues/1342"
 
 class WordOfTheDay(commands.Cog):
     def __init__(self, bot, guild_ids, discord_post_channel_id):
@@ -20,7 +20,8 @@ class WordOfTheDay(commands.Cog):
 
         bot.slash_command(guild_ids=guild_ids)(self.wotd)
 
-    async def wotd(self, ctx):
+    async def wotd(self, ctx, dp=DORUKYUM_PARAM_REASON):
+        logger.debug(f"reason for the dp: {dp}")
         wod = self.format_wod_response_embed(*await self.get_word_of_the_day())
         await ctx.respond(embed=wod)
 

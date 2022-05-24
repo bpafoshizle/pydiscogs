@@ -11,7 +11,7 @@ from discord.ext import commands, tasks
 from pydiscogs.utils.timing import fmt_datetime_to_minute, naive_to_us_central
 
 logger = logging.getLogger(__name__)
-
+DORUKYUM_PARAM_REASON = "https://github.com/Pycord-Development/pycord/issues/1342"
 
 class Twitch(commands.Cog):
     def __init__(
