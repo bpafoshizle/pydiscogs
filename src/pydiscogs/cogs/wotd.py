@@ -11,6 +11,7 @@ from pydiscogs.utils.timing import calc_tomorrow_6am, wait_until
 logger = logging.getLogger(__name__)
 DORUKYUM_PARAM_REASON = "https://github.com/Pycord-Development/pycord/issues/1342"
 
+
 class WordOfTheDay(commands.Cog):
     def __init__(self, bot, guild_ids, discord_post_channel_id):
         self.bot = bot

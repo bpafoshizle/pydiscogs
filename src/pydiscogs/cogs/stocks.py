@@ -13,6 +13,7 @@ from pydiscogs.utils.timing import calc_tomorrow_7am, wait_until
 logger = logging.getLogger(__name__)
 DORUKYUM_PARAM_REASON = "https://github.com/Pycord-Development/pycord/issues/1342"
 
+
 class StockQuote(commands.Cog):
     def __init__(
         self,

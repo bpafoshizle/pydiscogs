@@ -1,11 +1,12 @@
 import json
+import logging
 
 import aiohttp
-import logging
 from discord.ext import commands
 
 logger = logging.getLogger(__name__)
 DORUKYUM_PARAM_REASON = "https://github.com/Pycord-Development/pycord/issues/1342"
+
 
 class InspireQuote(commands.Cog):
     def __init__(self, bot, guild_ids=None):
