@@ -11,6 +11,7 @@ from discord.ext import commands, tasks
 from pydiscogs.utils.timing import calc_tomorrow_7am, wait_until
 
 logger = logging.getLogger(__name__)
+DORUKYUM_PARAM_REASON = "https://github.com/Pycord-Development/pycord/issues/1342"
 
 
 class StockQuote(commands.Cog):
@@ -55,7 +56,8 @@ class StockQuote(commands.Cog):
             logger.debug(article)
             await ctx.respond(embed=article)
 
-    async def marketnews(self, ctx):
+    async def marketnews(self, ctx, dp=DORUKYUM_PARAM_REASON):
+        logger.debug(f"reason for the dp: {dp}")
         stock_news = self.formatStockNewsEmbed(await self.getLatestMarketWatch())
         for article in stock_news:
             logger.debug(article)
