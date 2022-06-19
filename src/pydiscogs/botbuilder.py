@@ -23,7 +23,6 @@ def build_bot(yaml_config="./tests/testbot.yaml"):
 
     bot = commands.Bot(command_prefix=config["commandPrefix"], debug_guilds=guild_ids)
 
-
     discord_token = config["discordToken"]
     assert discord_token, "discordToken is a required configuration value"
 

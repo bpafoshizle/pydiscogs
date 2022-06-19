@@ -46,7 +46,9 @@ class Reddit(commands.Cog):
 
     @commands.slash_command()
     async def reddit_post(self, ctx, subreddit: str, limit: int = 1):
-        await ctx.respond(f"Getting entries for {subreddit}. Standby, reddit can be slow")
+        await ctx.respond(
+            f"Getting entries for {subreddit}. Standby, reddit can be slow"
+        )
         posts = await self.getTopEntries(subreddit=subreddit, limit=limit)
         for post in posts:
             logger.debug(post)
