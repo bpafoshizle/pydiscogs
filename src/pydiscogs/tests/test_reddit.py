@@ -27,7 +27,6 @@ class TestReddit(IsolatedAsyncioTestCase):
     async def asyncSetUp(self):
         self.reddit_cog = Reddit(
             bot=self.bot,
-            guild_ids=None,
             reddit_client_id=os.getenv("REDDIT_CLIENT_ID"),
             reddit_client_secret=os.getenv("REDDIT_CLIENT_SECRET"),
             reddit_username=os.getenv("REDDIT_USERNAME"),

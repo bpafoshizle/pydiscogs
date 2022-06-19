@@ -18,7 +18,7 @@ events = []
 class TestWordOfTheDay(IsolatedAsyncioTestCase):
     def setUp(self):
         self.bot = commands.Bot(command_prefix=".")
-        self.wotd_cog = WordOfTheDay(self.bot, None, os.getenv("DSCRD_CHNL_GENERAL"))
+        self.wotd_cog = WordOfTheDay(self.bot, os.getenv("DSCRD_CHNL_GENERAL"))
         events.append("setUp")
 
     async def asyncSetUp(self):
