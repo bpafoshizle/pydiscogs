@@ -18,10 +18,11 @@ def build_bot(yaml_config="./tests/testbot.yaml"):
     config = parse_config(yaml_config)
     command_prefix = config.get("commandPrefix")
     assert command_prefix, "commandPrefix is a required configuration value"
-    bot = commands.Bot(command_prefix=config["commandPrefix"])
-
     guild_ids = config.get("guildIds")
     assert guild_ids, "guildIds is a required configuration value"
+
+    bot = commands.Bot(command_prefix=config["commandPrefix"], debug_guilds=guild_ids)
+
 
     discord_token = config["discordToken"]
     assert discord_token, "discordToken is a required configuration value"
@@ -29,26 +30,27 @@ def build_bot(yaml_config="./tests/testbot.yaml"):
     async def on_ready():
         logging.info("Logged in as %s", bot.user)
 
+    @commands.slash_command()
     async def hello(ctx, name: str = None):
         name = name or ctx.author.name
         await ctx.respond(f"Hello {name}!")
 
     bot.add_listener(on_ready)
-    bot.slash_command(guild_ids=guild_ids)(hello)
+    # bot.slash_command(guild_ids=guild_ids)(hello)
 
     for cog in config["cogs"]:
         cog_name = cog["name"]
         cog_properties = cog.get("properties")
         if cog_name == "inspire":
-            add_inspire_cog(bot, guild_ids)
+            add_inspire_cog(bot)
         elif cog_name == "wotd":
-            add_wotd_cog(bot, guild_ids, cog_properties)
+            add_wotd_cog(bot, cog_properties)
         elif cog_name == "stocks":
-            add_stocks_cog(bot, guild_ids, cog_properties)
+            add_stocks_cog(bot, cog_properties)
         elif cog_name == "twitch":
-            add_twitch_cog(bot, guild_ids, cog_properties)
+            add_twitch_cog(bot, cog_properties)
         elif cog_name == "reddit":
-            add_reddit_cog(bot, guild_ids, cog_properties)
+            add_reddit_cog(bot, cog_properties)
 
     bot.discord_token = discord_token
     # logging.info("running bot: %s", bot)
@@ -65,23 +67,23 @@ def check_and_get_property(cog_properties, cog_name, property_name):
     return property_value
 
 
-def add_inspire_cog(bot, guild_ids):
-    bot.add_cog(InspireQuote(bot, guild_ids))
+def add_inspire_cog(bot):
+    bot.add_cog(InspireQuote(bot))
 
 
-def add_wotd_cog(bot, guild_ids, cog_properties):
+def add_wotd_cog(bot, cog_properties):
     post_channel_id = check_and_get_property(cog_properties, "wotd", "postChannelId")
-    bot.add_cog(WordOfTheDay(bot, guild_ids, post_channel_id))
+    bot.add_cog(WordOfTheDay(bot, post_channel_id))
 
 
-def add_stocks_cog(bot, guild_ids, cog_properties):
+def add_stocks_cog(bot, cog_properties):
     post_channel_id = check_and_get_property(cog_properties, "stocks", "postChannelId")
     polygon_token = check_and_get_property(cog_properties, "stocks", "polygonToken")
     stock_list = check_and_get_property(cog_properties, "stocks", "stockList")
-    bot.add_cog(StockQuote(bot, guild_ids, stock_list, polygon_token, post_channel_id))
+    bot.add_cog(StockQuote(bot, stock_list, polygon_token, post_channel_id))
 
 
-def add_twitch_cog(bot, guild_ids, cog_properties):
+def add_twitch_cog(bot, cog_properties):
     post_channel_id = check_and_get_property(cog_properties, "twitch", "postChannelId")
     twitch_client_id = check_and_get_property(
         cog_properties, "twitch", "twitchClientID"
@@ -95,7 +97,6 @@ def add_twitch_cog(bot, guild_ids, cog_properties):
     bot.add_cog(
         Twitch(
             bot,
-            guild_ids,
             twitch_client_id,
             twitch_client_secret,
             post_channel_id,
@@ -104,7 +105,7 @@ def add_twitch_cog(bot, guild_ids, cog_properties):
     )
 
 
-def add_reddit_cog(bot, guild_ids, cog_properties):
+def add_reddit_cog(bot, cog_properties):
     post_channel_id = check_and_get_property(cog_properties, "reddit", "postChannelId")
     reddit_client = check_and_get_property(cog_properties, "reddit", "redditClient")
     reddit_secret = check_and_get_property(cog_properties, "reddit", "redditSecret")
@@ -118,7 +119,6 @@ def add_reddit_cog(bot, guild_ids, cog_properties):
     bot.add_cog(
         Reddit(
             bot,
-            guild_ids,
             reddit_client,
             reddit_secret,
             reddit_username,

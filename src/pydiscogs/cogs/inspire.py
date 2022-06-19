@@ -5,16 +5,15 @@ import aiohttp
 from discord.ext import commands
 
 logger = logging.getLogger(__name__)
-DORUKYUM_PARAM_REASON = "https://github.com/Pycord-Development/pycord/issues/1342"
 
 
 class InspireQuote(commands.Cog):
-    def __init__(self, bot, guild_ids=None):
+    def __init__(self, bot):
         self.bot = bot
-        bot.slash_command(guild_ids=guild_ids)(self.inspire)
+        # bot.slash_command(guild_ids=guild_ids)(self.inspire)
 
-    async def inspire(self, ctx, dp=DORUKYUM_PARAM_REASON):
-        logger.debug(f"reason for the dp: {dp}")
+    @commands.slash_command()
+    async def inspire(self, ctx):
         await ctx.respond(await self.get_quote())
 
     async def get_quote(self):
