@@ -9,20 +9,19 @@ from discord.ext import commands, tasks
 from pydiscogs.utils.timing import calc_tomorrow_6am, wait_until
 
 logger = logging.getLogger(__name__)
-DORUKYUM_PARAM_REASON = "https://github.com/Pycord-Development/pycord/issues/1342"
 
 
 class WordOfTheDay(commands.Cog):
-    def __init__(self, bot, guild_ids, discord_post_channel_id):
+    def __init__(self, bot, discord_post_channel_id):
         self.bot = bot
         self.discord_post_channel_id = discord_post_channel_id
         # pylint: disable=no-member
         self.wotd_task.start()
 
-        bot.slash_command(guild_ids=guild_ids)(self.wotd)
+        # bot.slash_command(guild_ids=guild_ids)(self.wotd)
 
-    async def wotd(self, ctx, dp=DORUKYUM_PARAM_REASON):
-        logger.debug(f"reason for the dp: {dp}")
+    @commands.slash_command()
+    async def wotd(self, ctx):
         wod = self.format_wod_response_embed(*await self.get_word_of_the_day())
         await ctx.respond(embed=wod)
 

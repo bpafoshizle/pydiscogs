@@ -17,7 +17,7 @@ class Reddit(commands.Cog):
     def __init__(
         self,
         bot,
-        guild_ids,
+        # guild_ids,
         reddit_client_id,
         reddit_client_secret,
         reddit_username,
@@ -41,15 +41,20 @@ class Reddit(commands.Cog):
         self.subreddit_list = subreddit_list
         self.discord_post_channel_id = discord_post_channel_id
 
-        bot.slash_command(guild_ids=guild_ids)(self.reddit_post)
-        bot.slash_command(guild_ids=guild_ids)(self.reddit_post_id)
+        # bot.slash_command(guild_ids=guild_ids)(self.reddit_post)
+        # bot.slash_command(guild_ids=guild_ids)(self.reddit_post_id)
 
+    @commands.slash_command()
     async def reddit_post(self, ctx, subreddit: str, limit: int = 1):
+        await ctx.respond(
+            f"Getting entries for {subreddit}. Standby, reddit can be slow"
+        )
         posts = await self.getTopEntries(subreddit=subreddit, limit=limit)
         for post in posts:
             logger.debug(post)
             await ctx.respond(embed=post)
 
+    @commands.slash_command()
     async def reddit_post_id(self, ctx, post_id):
         sub = await self.reddit.submission(id=post_id)
         post = self.formatEmbed(sub)

@@ -16,7 +16,7 @@ events = []
 class TestInspireQuote(IsolatedAsyncioTestCase):
     def setUp(self):
         self.bot = commands.Bot(command_prefix=".")
-        self.inspire_cog = InspireQuote(self.bot, guild_ids=None)
+        self.inspire_cog = InspireQuote(self.bot)
         events.append("setUp")
 
     async def asyncSetUp(self):

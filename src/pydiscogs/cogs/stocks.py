@@ -11,14 +11,12 @@ from discord.ext import commands, tasks
 from pydiscogs.utils.timing import calc_tomorrow_7am, wait_until
 
 logger = logging.getLogger(__name__)
-DORUKYUM_PARAM_REASON = "https://github.com/Pycord-Development/pycord/issues/1342"
 
 
 class StockQuote(commands.Cog):
     def __init__(
         self,
         bot,
-        guild_ids,
         stock_list: List[str],
         polygon_token,
         discord_post_channel_id,
@@ -31,23 +29,26 @@ class StockQuote(commands.Cog):
         # pylint: disable=no-member
         self.stock_morning_report_task.start()
 
-        bot.slash_command(guild_ids=guild_ids)(self.stockquote)
-        bot.slash_command(guild_ids=guild_ids)(self.stockclose)
-        bot.slash_command(guild_ids=guild_ids)(self.stocknews)
-        bot.slash_command(guild_ids=guild_ids)(self.marketnews)
+        # bot.slash_command(guild_ids=guild_ids)(self.stockquote)
+        # bot.slash_command(guild_ids=guild_ids)(self.stockclose)
+        # bot.slash_command(guild_ids=guild_ids)(self.stocknews)
+        # bot.slash_command(guild_ids=guild_ids)(self.marketnews)
 
+    @commands.slash_command()
     async def stockquote(self, ctx, symbol):
         stock_quote = self.formatLatestStockQuoteEmbed(
             *await self.getLatestStockQuote(symbol)
         )
         await ctx.respond(embed=stock_quote)
 
+    @commands.slash_command()
     async def stockclose(self, ctx, symbol):
         stock_close = self.formatPrevCloseEmbed(
             *await self.getPrevClose(symbol.upper())
         )
         await ctx.respond(embed=stock_close)
 
+    @commands.slash_command()
     async def stocknews(self, ctx, symbol):
         stock_news = self.formatStockNewsEmbed(
             await self.getStockNewsMarketWatch(symbol)
@@ -56,8 +57,8 @@ class StockQuote(commands.Cog):
             logger.debug(article)
             await ctx.respond(embed=article)
 
-    async def marketnews(self, ctx, dp=DORUKYUM_PARAM_REASON):
-        logger.debug(f"reason for the dp: {dp}")
+    @commands.slash_command()
+    async def marketnews(self, ctx):
         stock_news = self.formatStockNewsEmbed(await self.getLatestMarketWatch())
         for article in stock_news:
             logger.debug(article)
