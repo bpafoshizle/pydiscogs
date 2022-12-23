@@ -40,12 +40,12 @@ jobs:
           export DSCRD_CHNL_GENERAL=\"${{ secrets.DSCRD_CHNL_GENERAL }}\"
           "
           # Write the commands to a file
-          echo "$commands" > env.txt
+          echo "$commands" > environment.sh
       - name: Upload env.txt as an artifact
         uses: actions/upload-artifact@v3
         with:
           name: environment
-          path: env.txt
+          path: environment.sh
   
   check-env-file:
     name: check environment file
@@ -56,11 +56,10 @@ jobs:
         uses: actions/download-artifact@v3
         with:
           name: environment
-          path: env.txt
       - shell: bash
         run: |
           # Read the commands from the file
-          source env.txt
+          source environment.sh
           # Print the environment variables
           echo $DSCRD_CHNL_GENERAL
   
