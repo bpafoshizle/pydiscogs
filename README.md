@@ -35,20 +35,22 @@ This will test an individual file.
 `python -m unittest discover -v src -p 'test_stocks.py'`
 
 
-## Development WIP
-```python
-twitch_client = twitchio.Client.from_client_credentials(
-            client_id=os.getenv("TWITCH_BOT_CLIENT_ID"),
-            client_secret=os.getenv("TWITCH_BOT_CLIENT_SECRET"),
-        )
+## Specifying Depedency from Git in setup.cfg
 
-twitch_eventsub_client = eventsub.EventSubClient(
-            client=twitch_client,
-            webhook_secret=os.getenv("TWITCH_WEBHOOK_SECRET"),
-            callback_route="https://bpafoshizle.com/webhooks/callback"
-        )
-        
-users = asyncio.run(twitch_client.fetch_users(join_channels))
-# [<User id=108647345 name=bpafoshizle display_name=bpafoshizle type=UserTypeEnum.none>, <User id=235807313 name=ephenry84 display_name=ephenry84 type=UserTypeEnum.none>, <User id=168197731 name=elzblazin display_name=elzblazin type=UserTypeEnum.none>, <User id=643319849 name=kuhouseii display_name=KuhouseII type=UserTypeEnum.none>, <User id=653518175 name=fwm_bot display_name=FWM_Bot type=UserTypeEnum.none>]
-response = asyncio.run(twitch_eventsub_client.subscribe_channel_stream_start(108647345))
+Now that I am switching over to official pypi version of pycord, I didn't want to lose this syntax for posterity, since it was difficult to find and figure out. Will come in useful again I am sure. 
+
 ```
+install_requires =
+    py_cord @ git+https://github.com/Pycord-Development/pycord@master
+    bs4==0.0.1
+    pytz==2021.1
+    twitchio>=2.0.2
+    asyncpraw==7.5.0
+    gfycat==0.2.2
+    pyaml-env==1.1.3
+```
+
+## Specifying dependency from git in requirements.txt
+
+This one is more common than the need to do this in the setup.cfg, but preserving it here in any case. 
+`git+https://github.com/Pycord-Development/pycord@master#egg=py_cord`
