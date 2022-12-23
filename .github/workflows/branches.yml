@@ -6,20 +6,10 @@ on:
     branches-ignore:
       - main
 jobs:
-  show-key-values:
-    name: show values of variables
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: run test command
-        run: |
-          echo github.event_name: ${{ github.event_name }}
-          echo github.ref: ${{ github.ref }}
-  
   call-format-and-lint:
     uses: bpafoshizle/actions/.github/workflows/lint.yml@main
 
-  setup-environment-file:
+  setup-test-environment-file:
     name: set up environment file
     runs-on: ubuntu-latest
     steps:
@@ -40,30 +30,13 @@ jobs:
           export DSCRD_CHNL_GENERAL=\"${{ secrets.DSCRD_CHNL_GENERAL }}\"
           "
           # Write the commands to a file
-          echo "$commands" > environment.sh
+          echo "$commands" > test-environment.sh
       - name: Upload environment.sh as an artifact
         uses: actions/upload-artifact@v3
         with:
-          name: environment
-          path: environment.sh
-  
-  check-env-file:
-    name: check environment file
-    runs-on: ubuntu-latest
-    needs: setup-environment-file
-    steps:
-      - name: Download env.txt as an artifact
-        uses: actions/download-artifact@v3
-        with:
-          name: environment
-      - shell: bash
-        run: |
-          # Read the commands from the file
-          source environment.sh
-          # Print the environment variables
-          echo $DSCRD_CHNL_GENERAL
-
+          name: test-environment
+          path: test-environment.sh
 
   call-test-python:
-    needs: setup-environment-file
+    needs: setup-test-environment-file
     uses: bpafoshizle/actions/.github/workflows/test-python.yml@add-test-python-workflow
