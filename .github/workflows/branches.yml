@@ -41,7 +41,7 @@ jobs:
           "
           # Write the commands to a file
           echo "$commands" > environment.sh
-      - name: Upload env.txt as an artifact
+      - name: Upload environment.sh as an artifact
         uses: actions/upload-artifact@v3
         with:
           name: environment
@@ -63,34 +63,22 @@ jobs:
           # Print the environment variables
           echo $DSCRD_CHNL_GENERAL
   
-  test-python:
-    # Ensure test job passes before pushing image.
-    needs: call-format-and-lint
-    # Name the Job
-    name: Test python
-    # Set the type of machine to run on
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: checkout code
-        uses: actions/checkout@v2
-
-      - name: install test dependencies
-        run: |
-          pip install -r requirements.txt
-
-      - name: run tests
-        run: |
-          python -m unittest discover -v -s src
-        env:
-          POLYGON_TOKEN: ${{ secrets.POLYGON_TOKEN }}
-          TWITCH_BOT_USERNAME: ${{ secrets.TWITCH_BOT_USERNAME }}
-          TWITCH_BOT_CLIENT_ID: ${{ secrets.TWITCH_BOT_CLIENT_ID }}
-          TWITCH_BOT_CLIENT_SECRET: ${{ secrets.TWITCH_BOT_CLIENT_SECRET }}
-          REDDIT_CLIENT_ID: ${{ secrets.REDDIT_CLIENT_ID }}
-          REDDIT_CLIENT_SECRET: ${{ secrets.REDDIT_CLIENT_SECRET }}
-          REDDIT_USERNAME: ${{ secrets.REDDIT_USERNAME }}
-          REDDIT_PASSWORD: ${{ secrets.REDDIT_PASSWORD }}
-          GFYCAT_CLIENT_ID: ${{ secrets.GFYCAT_CLIENT_ID }}
-          GFYCAT_CLIENT_SECRET: ${{ secrets.GFYCAT_CLIENT_SECRET }}
-          DSCRD_CHNL_GENERAL: ${{ secrets.DSCRD_CHNL_GENERAL }}
+  call-test-python:
+    #needs: call-format-and-lint
+    uses: bpafoshizle/actions/.github/workflows/test-python.yml@add-test-python-workflow
+    with:
+      env-setup-command: |
+        # Write the commands to set the environment variables to a string
+        commands="# Set the environment variables
+        export POLYGON_TOKEN=\"${{ secrets.POLYGON_TOKEN }}\"
+        export TWITCH_BOT_USERNAME=\"${{ secrets.TWITCH_BOT_USERNAME }}\"
+        export TWITCH_BOT_CLIENT_ID=\"${{ secrets.TWITCH_BOT_CLIENT_ID }}\"
+        export TWITCH_BOT_CLIENT_SECRET=\"${{ secrets.TWITCH_BOT_CLIENT_SECRET }}\"
+        export REDDIT_CLIENT_ID=\"${{ secrets.REDDIT_CLIENT_ID }}\"
+        export REDDIT_CLIENT_SECRET=\"${{ secrets.REDDIT_CLIENT_SECRET }}\"
+        export REDDIT_USERNAME=\"${{ secrets.REDDIT_USERNAME }}\"
+        export REDDIT_PASSWORD=\"${{ secrets.REDDIT_PASSWORD }}\"
+        export GFYCAT_CLIENT_ID=\"${{ secrets.GFYCAT_CLIENT_ID }}\"
+        export GFYCAT_CLIENT_SECRET=\"${{ secrets.GFYCAT_CLIENT_SECRET }}\"
+        export DSCRD_CHNL_GENERAL=\"${{ secrets.DSCRD_CHNL_GENERAL }}\"
+        "
