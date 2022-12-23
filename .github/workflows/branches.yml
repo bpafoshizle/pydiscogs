@@ -82,3 +82,4 @@ jobs:
         export GFYCAT_CLIENT_SECRET=\"${{ secrets.GFYCAT_CLIENT_SECRET }}\"
         export DSCRD_CHNL_GENERAL=\"${{ secrets.DSCRD_CHNL_GENERAL }}\"
         "
+        
