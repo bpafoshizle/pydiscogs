@@ -66,8 +66,11 @@ jobs:
   setup-env:
     #needs: call-format-and-lint
     runs-on: ubuntu-latest
+    outputs:
+      env-setup-command: ${{ steps.set-output-defaults.outputs.build-and-verify }}
     steps:
     - name: Set environment string
+      id: set-env-string
       run: |
         # Write the commands to set the environment variables to a string
         commands="# Set the environment variables
@@ -83,11 +86,11 @@ jobs:
         export GFYCAT_CLIENT_SECRET=\"${{ secrets.GFYCAT_CLIENT_SECRET }}\"
         export DSCRD_CHNL_GENERAL=\"${{ secrets.DSCRD_CHNL_GENERAL }}\"
         "
-        echo "::set-env name=ENV_COMMANDS::$commands"
+        echo "::set-output name=env-setup-command::$commands"
 
   call-test-python:
     # Ensure lint job passes before building image.
     needs: setup-env
     uses: bpafoshizle/actions/.github/workflows/test-python.yml@add-test-python-workflow
     with:
-      env-setup-command: ${{ env.ENV_COMMANDS }}
+      env-setup-command: ${{needs.setup-env.outputs.env-setup-command}}
