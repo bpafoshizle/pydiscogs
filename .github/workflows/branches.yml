@@ -68,18 +68,17 @@ jobs:
     uses: bpafoshizle/actions/.github/workflows/test-python.yml@add-test-python-workflow
     with:
       env-setup-command: |
-        # Write the commands to set the environment variables to a string
-        commands="# Set the environment variables
-        export POLYGON_TOKEN=\"${{ secrets.POLYGON_TOKEN }}\"
-        export TWITCH_BOT_USERNAME=\"${{ secrets.TWITCH_BOT_USERNAME }}\"
-        export TWITCH_BOT_CLIENT_ID=\"${{ secrets.TWITCH_BOT_CLIENT_ID }}\"
-        export TWITCH_BOT_CLIENT_SECRET=\"${{ secrets.TWITCH_BOT_CLIENT_SECRET }}\"
-        export REDDIT_CLIENT_ID=\"${{ secrets.REDDIT_CLIENT_ID }}\"
-        export REDDIT_CLIENT_SECRET=\"${{ secrets.REDDIT_CLIENT_SECRET }}\"
-        export REDDIT_USERNAME=\"${{ secrets.REDDIT_USERNAME }}\"
-        export REDDIT_PASSWORD=\"${{ secrets.REDDIT_PASSWORD }}\"
-        export GFYCAT_CLIENT_ID=\"${{ secrets.GFYCAT_CLIENT_ID }}\"
-        export GFYCAT_CLIENT_SECRET=\"${{ secrets.GFYCAT_CLIENT_SECRET }}\"
-        export DSCRD_CHNL_GENERAL=\"${{ secrets.DSCRD_CHNL_GENERAL }}\"
-        "
-        
+        "# Write the commands to set the environment variables to a string
+        commands=\"# Set the environment variables
+        export POLYGON_TOKEN=\\"${{ secrets.POLYGON_TOKEN }}\\"
+        export TWITCH_BOT_USERNAME=\\"${{ secrets.TWITCH_BOT_USERNAME }}\\"
+        export TWITCH_BOT_CLIENT_ID=\\"${{ secrets.TWITCH_BOT_CLIENT_ID }}\\"
+        export TWITCH_BOT_CLIENT_SECRET=\\"${{ secrets.TWITCH_BOT_CLIENT_SECRET }}\\"
+        export REDDIT_CLIENT_ID=\\"${{ secrets.REDDIT_CLIENT_ID }}\\"
+        export REDDIT_CLIENT_SECRET=\"${{ secrets.REDDIT_CLIENT_SECRET }}\\"
+        export REDDIT_USERNAME=\\"${{ secrets.REDDIT_USERNAME }}\\"
+        export REDDIT_PASSWORD=\\"${{ secrets.REDDIT_PASSWORD }}\\"
+        export GFYCAT_CLIENT_ID=\\"${{ secrets.GFYCAT_CLIENT_ID }}\\"
+        export GFYCAT_CLIENT_SECRET=\\"${{ secrets.GFYCAT_CLIENT_SECRET }}\\"
+        export DSCRD_CHNL_GENERAL=\\"${{ secrets.DSCRD_CHNL_GENERAL }}\\"
+        \""
