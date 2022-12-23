@@ -84,10 +84,6 @@ jobs:
         export DSCRD_CHNL_GENERAL=\"${{ secrets.DSCRD_CHNL_GENERAL }}\"
         "
         echo "::set-env name=ENV_COMMANDS::$commands"
-    - name: Call test python workflow
-      uses: bpafoshizle/actions/.github/workflows/test-python.yml@add-test-python-workflow
-      with:
-        env-setup-command: ${{ env.ENV_COMMANDS }}
 
   call-test-python:
     # Ensure lint job passes before building image.
