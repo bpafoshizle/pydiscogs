@@ -63,7 +63,7 @@ jobs:
           # Print the environment variables
           echo $DSCRD_CHNL_GENERAL
   
-  setup-env-and-call-test-python:
+  setup-env:
     #needs: call-format-and-lint
     runs-on: ubuntu-latest
     steps:
@@ -88,3 +88,10 @@ jobs:
       uses: bpafoshizle/actions/.github/workflows/test-python.yml@add-test-python-workflow
       with:
         env-setup-command: ${{ env.ENV_COMMANDS }}
+
+  call-test-python:
+    # Ensure lint job passes before building image.
+    needs: setup-env
+    uses: bpafoshizle/actions/.github/workflows/test-python.yml@add-test-python-workflow
+    with:
+      env-setup-command: ${{ env.ENV_COMMANDS }}
