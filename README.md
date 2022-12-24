@@ -37,9 +37,9 @@ This will test an individual file.
 
 ## Specifying Depedency from Git in setup.cfg
 
-Now that I am switching over to official pypi version of pycord, I didn't want to lose this syntax for posterity, since it was difficult to find and figure out. Will come in useful again I am sure. 
+Now that I am switching over to official pypi version of pycord, I didn't want to lose this syntax for posterity, since it was difficult to find and figure out. Will come in useful again I am sure.
 
-```
+```yaml
 install_requires =
     py_cord @ git+https://github.com/Pycord-Development/pycord@master
     bs4==0.0.1
@@ -52,5 +52,5 @@ install_requires =
 
 ## Specifying dependency from git in requirements.txt
 
-This one is more common than the need to do this in the setup.cfg, but preserving it here in any case. 
+This one is more common than the need to do this in the setup.cfg, but preserving it here in any case.
 `git+https://github.com/Pycord-Development/pycord@master#egg=py_cord`
