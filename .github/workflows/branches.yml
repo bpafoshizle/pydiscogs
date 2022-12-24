@@ -41,4 +41,4 @@ jobs:
 
   call-test-python:
     needs: setup-test-environment-file
-    uses: bpafoshizle/actions/.github/workflows/test-python.yml@add-test-python-workflow
+    uses: bpafoshizle/actions/.github/workflows/test-python.yml@main
