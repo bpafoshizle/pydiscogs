@@ -1,5 +1,6 @@
 import logging
 import os
+from typing import Optional
 
 from discord.ext import commands
 from pyaml_env import parse_config
@@ -30,7 +31,7 @@ def build_bot(yaml_config="./tests/testbot.yaml"):
         logging.info("Logged in as %s", bot.user)
 
     @commands.slash_command()
-    async def hello(ctx, name: str = None):
+    async def hello(ctx, name: Optional[str] = None):
         name = name or ctx.author.name
         await ctx.respond(f"Hello {name}!")
 
