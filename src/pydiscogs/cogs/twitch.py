@@ -1,7 +1,7 @@
 import logging
 from datetime import datetime, timezone
 from pprint import pprint
-from typing import List
+from typing import List, Optional
 from uuid import UUID
 
 import discord
@@ -168,7 +168,7 @@ class Twitch(commands.Cog):
         response = await self.client.fetch_users(username)
         return response[0].id, response[0].profile_image
 
-    async def get_user_data(self, users: List[str] = None):
+    async def get_user_data(self, users: Optional[List[str]] = None):
         if not users:
             users = self.join_channels_list
         return await self.twitch_client.fetch_users(users)

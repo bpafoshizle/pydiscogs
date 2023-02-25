@@ -53,7 +53,7 @@ class WordOfTheDay(commands.Cog):
                     logger.debug(
                         "received response from https://www.merriam-webster.com/word-of-the-day"
                     )
-                    word = soup.find("div", class_="word-and-pronunciation").h1.string
+                    word = soup.find("div", class_="word-and-pronunciation").h2.string
                     part_of_speech = soup.find("span", class_="main-attr").string
                     word_syllables = soup.find("span", class_="word-syllables").string
                     definitions = list(
