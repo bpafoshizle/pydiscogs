@@ -1,10 +1,13 @@
 import logging
 
+# import discord
 import tweepy
-import discord
-from discord.ext import commands, tasks
+
+# from discord.ext import commands, tasks
+from discord.ext import commands
 
 logger = logging.getLogger(__name__)
+
 
 class Twitter(commands.Cog):
     def __init__(
@@ -27,9 +30,7 @@ class Twitter(commands.Cog):
         )
 
         bot.slash_command(guild_ids=guild_ids)(self.twitter_search)
-    
+
     async def twitter_search(self, ctx, search_term):
-        tweets = self.twitter.search_recent_tweets(
-            search_term, max_results=5
-        )
+        tweets = self.twitter.search_recent_tweets(search_term, max_results=5)
         await ctx.respond(tweets)
