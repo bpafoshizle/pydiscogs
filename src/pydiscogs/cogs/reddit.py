@@ -3,7 +3,6 @@ import logging
 import asyncpraw
 import discord
 from discord.ext import commands, tasks
-from gfycat.client import GfycatClient
 
 from pydiscogs.utils.timing import calc_tomorrow_6am, wait_until
 
@@ -23,8 +22,6 @@ class Reddit(commands.Cog):
         reddit_username,
         reddit_password,
         subreddit_list,
-        gfycat_client_id,
-        gfycat_client_secret,
         discord_post_channel_id: int,
     ):
         self.bot = bot
@@ -37,7 +34,6 @@ class Reddit(commands.Cog):
             password=reddit_password,
             user_agent="pydiscogs reddit cog",
         )
-        self.gfycat = GfycatClient(gfycat_client_id, gfycat_client_secret)
         self.subreddit_list = subreddit_list
         self.discord_post_channel_id = discord_post_channel_id
 
@@ -100,9 +96,7 @@ class Reddit(commands.Cog):
 
     def handlePostImageUrl(self, sub):
         imageExtTuple = (".jpg", ".jpeg", ".png", ".gif", ".gifv", ".webm", ".mp4")
-        if "gfycat" in sub.url:
-            return self.getGfyCatGifUrl(sub.url.rsplit("/", 1)[-1])
-        elif sub.url.lower().endswith(imageExtTuple):
+        if sub.url.lower().endswith(imageExtTuple):
             return sub.url
         else:
             try:
@@ -112,10 +106,6 @@ class Reddit(commands.Cog):
                     "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?ixlib=rb-1.2.1&ixid"
                     "=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=400&q=80"
                 )
-
-    def getGfyCatGifUrl(self, gfyid):
-        response = self.gfycat.query_gfy(gfyid)
-        return response["gfyItem"]["content_urls"]["max5mbGif"]["url"]
 
     async def formatEmbedList(self, submissions):
         embeds = []

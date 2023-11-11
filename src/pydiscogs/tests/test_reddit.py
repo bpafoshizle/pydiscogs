@@ -32,8 +32,6 @@ class TestReddit(IsolatedAsyncioTestCase):
             reddit_username=os.getenv("REDDIT_USERNAME"),
             reddit_password=os.getenv("REDDIT_PASSWORD"),
             subreddit_list=["sexygirls", "battlefield"],
-            gfycat_client_id=os.getenv("GFYCAT_CLIENT_ID"),
-            gfycat_client_secret=os.getenv("GFYCAT_CLIENT_SECRET"),
             discord_post_channel_id=os.getenv("DSCRD_CHNL_GENERAL"),
         )
         events.append("asyncSetUp")
