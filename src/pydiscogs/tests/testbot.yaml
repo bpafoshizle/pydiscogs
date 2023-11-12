@@ -40,6 +40,4 @@ cogs:
         - getmotivated
         - todayilearned
         - interestingasfuck
-      gfycatClientId: !ENV ${GFYCAT_CLIENT_ID}
-      gfycatClientSecret: !ENV ${GFYCAT_CLIENT_SECRET}
       postChannelId: !ENV ${DSCRD_CHNL_GENERAL}
