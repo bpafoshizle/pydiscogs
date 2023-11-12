@@ -112,10 +112,6 @@ def add_reddit_cog(bot, cog_properties):
     reddit_username = check_and_get_property(cog_properties, "reddit", "redditUsername")
     reddit_password = check_and_get_property(cog_properties, "reddit", "redditPassword")
     subreddit_list = check_and_get_property(cog_properties, "reddit", "subRedditList")
-    gfycat_client = check_and_get_property(cog_properties, "reddit", "gfycatClientId")
-    gfycat_client_secret = check_and_get_property(
-        cog_properties, "reddit", "gfycatClientSecret"
-    )
     bot.add_cog(
         Reddit(
             bot,
@@ -124,8 +120,6 @@ def add_reddit_cog(bot, cog_properties):
             reddit_username,
             reddit_password,
             subreddit_list,
-            gfycat_client,
-            gfycat_client_secret,
             post_channel_id,
         )
     )
