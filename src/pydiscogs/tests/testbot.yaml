@@ -18,7 +18,7 @@ cogs:
         - IJR
         - BTC-USD
         - ETC-USD
-      polygonToken: !ENV ${POLYGON_TOKEN}
+      polygonToken: !ENV ${POLYGON_API_KEY}
       postChannelId: !ENV ${DSCRD_CHNL_MONEY}
   - name: twitch
     properties:

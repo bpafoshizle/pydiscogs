@@ -1,7 +1,8 @@
-py-cord==2.4.1
+py-cord==2.6.1ß
 bs4==0.0.1
 pytz==2021.1
 twitchio>=2.0.2
 asyncpraw==7.7.1
 tweepy[async]==4.12.1
 pyaml-env==1.2.1
+polygon-api-client==1.13.4

@@ -6,6 +6,7 @@ import aiohttp
 import discord
 from bs4 import BeautifulSoup
 from discord.ext import commands, tasks
+from polygon import RESTClient
 
 # from icecream import ic
 from pydiscogs.utils.timing import calc_tomorrow_7am, wait_until
@@ -45,6 +46,13 @@ class StockQuote(commands.Cog):
     async def stockclose(self, ctx, symbol):
         stock_close = self.formatPrevCloseEmbed(
             *await self.getPrevClose(symbol.upper())
+        )
+        await ctx.respond(embed=stock_close)
+
+    @commands.slash_command()
+    async def stockclose2(self, ctx, symbol):
+        stock_close = self.formatPrevCloseEmbed(
+            *await self.getPrevCloseV2(symbol.upper())
         )
         await ctx.respond(embed=stock_close)
 
@@ -171,7 +179,15 @@ class StockQuote(commands.Cog):
                     prev_high = json_data["results"][0]["h"]
                     prev_low = json_data["results"][0]["l"]
                     return (symbol, prev_close, prev_high, prev_low)
+                
+    async def getPrevCloseV2(self, symbol):
+        client = RESTClient() # uses POLYGON_API_KEY
+        prevClose = client.get_previous_close(symbol)
+        logger.debug(prevClose)
+        return (prevClose.ticker, prevClose.close, prevClose.high, prevClose.low)
+        
 
+    
     async def getLatestStockQuote(self, symbol):
         async with aiohttp.ClientSession() as session:
             async with session.get(
