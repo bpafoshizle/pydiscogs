@@ -61,7 +61,7 @@ class TestStockQuote(IsolatedAsyncioTestCase):
             change,
             pctchange,
             quotetime,
-            earnings_date
+            earnings_date,
         ) = await self.stock_cog.getLatestStockQuote("VTSAX")
         # ic(symbol, name, lastprice, change, quotetime)
         self.assertTrue(isinstance(symbol, str))
