@@ -2,13 +2,10 @@ import logging
 from datetime import datetime
 from typing import List
 
-import aiohttp
 import discord
 import yfinance as yf
-from bs4 import BeautifulSoup
 from discord.ext import commands, tasks
 from polygon import RESTClient
-
 
 # from icecream import ic
 from pydiscogs.utils.timing import calc_tomorrow_7am, wait_until
@@ -48,13 +45,11 @@ class StockQuote(commands.Cog):
 
     @commands.slash_command()
     async def stocknews(self, ctx, symbol):
-        stock_news = self.formatStockNewsEmbed(
-            await self.getStockNewsyfinance(symbol)
-        )
+        stock_news = self.formatStockNewsEmbed(await self.getStockNewsyfinance(symbol))
         for article in stock_news:
             logger.debug(article)
             await ctx.respond(embed=article)
-    
+
     @commands.slash_command()
     async def getlateststocknews(self, ctx):
         stock_news = self.formatStockNewsEmbed(await self.getLatestNewsStockList())
@@ -86,7 +81,7 @@ class StockQuote(commands.Cog):
     async def getStockNewsyfinance(self, symbol, maxcount=5):
         ticker = yf.Ticker(symbol)
         return ticker.news[:maxcount]
-    
+
     async def getLatestNewsStockList(self):
         stock_news = []
         for stock in self.stock_list:
@@ -94,8 +89,8 @@ class StockQuote(commands.Cog):
                 stock_news.append((await self.getStockNewsyfinance(stock, 1))[0])
             except IndexError:
                 pass
-        return stock_news   
-                
+        return stock_news
+
     async def getPrevClose(self, symbol):
         prevClose = self.polygon_client.get_previous_close_agg(symbol)[0]
         logger.debug(prevClose)
@@ -111,26 +106,29 @@ class StockQuote(commands.Cog):
         else:
             change = 0
             pctchange = 0
-        
+
         # Safely handle missing 'Earnings Date' in the 'calendar' dictionary
         try:
-            earnings_date = ticker.calendar['Earnings Date'][0]
+            earnings_date = ticker.calendar["Earnings Date"][0]
         except (KeyError, IndexError):
-            earnings_date = 'N/A'
+            earnings_date = "N/A"
 
         return (
-            ticker.info.get('symbol', 'N/A'),
-            ticker.info.get('shortName', 'N/A'),
-            str(round(ticker.fast_info.last_price, 2)) if hasattr(ticker.fast_info, 'last_price') else 'N/A',
-            str(round(change, 2)) if isinstance(change, (int, float)) else 'N/A',
-            str(round(pctchange, 2)) if isinstance(pctchange, (int, float)) else 'N/A',
+            ticker.info.get("symbol", "N/A"),
+            ticker.info.get("shortName", "N/A"),
+            (
+                str(round(ticker.fast_info.last_price, 2))
+                if hasattr(ticker.fast_info, "last_price")
+                else "N/A"
+            ),
+            str(round(change, 2)) if isinstance(change, (int, float)) else "N/A",
+            str(round(pctchange, 2)) if isinstance(pctchange, (int, float)) else "N/A",
             str(datetime.now()),
-            earnings_date
+            earnings_date,
         )
 
     def formatLatestStockQuoteEmbed(
-        self, symbol, name, lastprice, change, pctchange, quotetime,
-        earningsdate
+        self, symbol, name, lastprice, change, pctchange, quotetime, earningsdate
     ):
         embed = discord.Embed(
             title="Stock Latest Quote",
@@ -174,7 +172,10 @@ class StockQuote(commands.Cog):
                 embed.set_image(url="")
             embed.add_field(name="Source", value=article["publisher"])
             embed.add_field(
-                name="Timestamp", value=datetime.fromtimestamp(article.get("providerPublishTime", datetime.now().timestamp())).strftime("%Y-%m-%d %H:%M:%S")
+                name="Timestamp",
+                value=datetime.fromtimestamp(
+                    article.get("providerPublishTime", datetime.now().timestamp())
+                ).strftime("%Y-%m-%d %H:%M:%S"),
             )
             embeds.append(embed)
         return embeds
