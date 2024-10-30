@@ -32,7 +32,7 @@ class TestStockQuote(IsolatedAsyncioTestCase):
             self.bot,
             stock_list,
             os.getenv("POLYGON_API_KEY"),
-            os.getenv("DSCRD_CHNL_MONEY"),
+            discord_post_channel_id="NA",
         )
         events.append("setUp")
 
