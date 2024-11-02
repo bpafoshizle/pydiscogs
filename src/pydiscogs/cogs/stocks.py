@@ -24,7 +24,7 @@ class StockQuote(commands.Cog):
     ):
         
         if polygon_api_key is None:
-            raise AuthError(
+            raise ValueError(
                 f"Must specify env var POLYGON_API_KEY or pass api_key in constructor"
             )
         if discord_post_channel_id is None:
