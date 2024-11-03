@@ -31,7 +31,6 @@ class TestStockQuote(IsolatedAsyncioTestCase):
         self.stock_cog = StockQuote(
             self.bot,
             stock_list,
-            os.getenv("POLYGON_API_KEY"),
             discord_post_channel_id="NA",
         )
         events.append("setUp")
