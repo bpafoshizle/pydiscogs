@@ -3,6 +3,7 @@
 
    isort:skip_file
 """
+
 import asyncio
 import os
 import unittest
@@ -16,10 +17,10 @@ from pydiscogs.cogs.stocks import StockQuote
 events = []
 
 stock_list = [
-    "SPY",
-    "QQQ",
+    "TSLA",
+    "TSN",
     "GME",
-    "IJR",
+    "QQQ",
     "BTC-USD",
     "ETC-USD",
 ]
@@ -31,8 +32,8 @@ class TestStockQuote(IsolatedAsyncioTestCase):
         self.stock_cog = StockQuote(
             self.bot,
             stock_list,
-            os.getenv("POLYGON_TOKEN"),
-            os.getenv("DSCRD_CHNL_MONEY"),
+            os.getenv("POLYGON_API_KEY"),
+            discord_post_channel_id="NA",
         )
         events.append("setUp")
 
@@ -61,6 +62,7 @@ class TestStockQuote(IsolatedAsyncioTestCase):
             change,
             pctchange,
             quotetime,
+            earnings_date,
         ) = await self.stock_cog.getLatestStockQuote("VTSAX")
         # ic(symbol, name, lastprice, change, quotetime)
         self.assertTrue(isinstance(symbol, str))
@@ -75,6 +77,8 @@ class TestStockQuote(IsolatedAsyncioTestCase):
         self.assertTrue(isinstance(pctchange, str))
         self.assertGreater(len(pctchange), 0)
         self.assertTrue(isinstance(quotetime, str))
+        self.assertGreater(len(quotetime), 0)
+        self.assertTrue(isinstance(earnings_date, str))
         self.assertGreater(len(quotetime), 0)
         self.addAsyncCleanup(self.on_cleanup)
 
@@ -99,7 +103,7 @@ class TestStockQuote(IsolatedAsyncioTestCase):
         Test that the function returns a proper response
         """
         events.append("test_getLatestMarketWatch_returns_proper_response")
-        news = await self.stock_cog.getLatestMarketWatch()
+        news = await self.stock_cog.getLatestNewsStockList()
         # ic(news)
         self.assertTrue(isinstance(news, list))
         self.assertGreaterEqual(len(news), 5)

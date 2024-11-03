@@ -86,7 +86,9 @@ class Reddit(commands.Cog):
     async def getTopEntries(self, subreddit, limit):
         subreddit = await self.reddit.subreddit(subreddit)
         submissions = []
-        async for submission in subreddit.hot():  # use .new.stream() for endless polling
+        async for (
+            submission
+        ) in subreddit.hot():  # use .new.stream() for endless polling
             if submission.stickied:
                 continue
             submissions.append(submission)

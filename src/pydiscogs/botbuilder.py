@@ -78,9 +78,9 @@ def add_wotd_cog(bot, cog_properties):
 
 def add_stocks_cog(bot, cog_properties):
     post_channel_id = check_and_get_property(cog_properties, "stocks", "postChannelId")
-    polygon_token = check_and_get_property(cog_properties, "stocks", "polygonToken")
+    polygon_api_key = check_and_get_property(cog_properties, "stocks", "polygonAPIKey")
     stock_list = check_and_get_property(cog_properties, "stocks", "stockList")
-    bot.add_cog(StockQuote(bot, stock_list, polygon_token, post_channel_id))
+    bot.add_cog(StockQuote(bot, stock_list, polygon_api_key, post_channel_id))
 
 
 def add_twitch_cog(bot, cog_properties):
