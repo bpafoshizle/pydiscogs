@@ -20,16 +20,16 @@ class StockQuote(commands.Cog):
         bot,
         stock_list: List[str],
         polygon_api_key: str = os.getenv("POLYGON_API_KEY"),
-        discord_post_channel_id = None,
+        discord_post_channel_id=None,
     ):
-        
+
         if polygon_api_key is None:
             raise ValueError(
-                f"Must specify env var POLYGON_API_KEY or pass api_key in constructor"
+                "Must specify env var POLYGON_API_KEY or pass api_key in constructor"
             )
         if discord_post_channel_id is None:
             raise ValueError(
-                f"Must specify env var DISCORD_POST_CHANNEL_ID or pass channel_id in constructor"
+                "Must specify env var DISCORD_POST_CHANNEL_ID or pass channel_id in constructor"
             )
         self.bot = bot
         self.stock_list = stock_list
