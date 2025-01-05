@@ -54,3 +54,16 @@ install_requires =
 
 This one is more common than the need to do this in the setup.cfg, but preserving it here in any case.
 `git+https://github.com/Pycord-Development/pycord@master#egg=py_cord`
+
+
+## AI Dev Notes
+
+Curl Ollama endpoint on another local host:
+
+```bash
+curl http://bpapc.lan:11434/api/generate -d '{
+  "model": "llama3.2",
+  "prompt": "Why is the sky blue?",
+  "stream": false
+}'
+```

@@ -10,6 +10,7 @@ from pydiscogs.cogs.reddit import Reddit
 from pydiscogs.cogs.stocks import StockQuote
 from pydiscogs.cogs.twitch import Twitch
 from pydiscogs.cogs.wotd import WordOfTheDay
+from pydiscogs.cogs.ai import AI
 
 LOGLEVEL = os.environ.get("LOGLEVEL", "WARNING").upper()
 logging.basicConfig(level=LOGLEVEL)
@@ -51,6 +52,7 @@ def build_bot(yaml_config="./tests/testbot.yaml"):
             add_twitch_cog(bot, cog_properties)
         elif cog_name == "reddit":
             add_reddit_cog(bot, cog_properties)
+        elif cog_name == "ai"
 
     bot.discord_token = discord_token
     # logging.info("running bot: %s", bot)
@@ -121,5 +123,18 @@ def add_reddit_cog(bot, cog_properties):
             reddit_password,
             subreddit_list,
             post_channel_id,
+        )
+    )
+
+def add_ai_cog(bot, cog_properties):
+    ollama_endpoint = check_and_get_property(cog_properties, "ai", "ollamaEndpoint")
+    groq_api_key = check_and_get_property(cog_properties, "ai", "groqAPIKey")
+    ai_system_prompt = check_and_get_property(cog_properties, "ai", "systemPrompt")
+    bot.add_cog(
+        AI(
+            bot,
+            ollama_endpoint,
+            groq_api_key,
+            ai_system_prompt,
         )
     )
