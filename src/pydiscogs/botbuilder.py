@@ -52,7 +52,8 @@ def build_bot(yaml_config="./tests/testbot.yaml"):
             add_twitch_cog(bot, cog_properties)
         elif cog_name == "reddit":
             add_reddit_cog(bot, cog_properties)
-        elif cog_name == "ai"
+        elif cog_name == "ai":
+            add_ai_cog(bot, cog_properties)
 
     bot.discord_token = discord_token
     # logging.info("running bot: %s", bot)
