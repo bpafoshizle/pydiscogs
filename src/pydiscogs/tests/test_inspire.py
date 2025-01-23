@@ -8,8 +8,11 @@ import unittest
 import asyncio
 from unittest import IsolatedAsyncioTestCase  # pylint: disable=no-name-in-module
 
+from dotenv import load_dotenv
 from discord.ext import commands
 from pydiscogs.cogs.inspire import InspireQuote
+
+load_dotenv(override=True)
 
 events = []
 

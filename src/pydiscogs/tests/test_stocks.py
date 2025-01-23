@@ -11,9 +11,11 @@ import unittest
 # from icecream import ic
 from unittest import IsolatedAsyncioTestCase  # pylint: disable=no-name-in-module
 
+from dotenv import load_dotenv
 from discord.ext import commands
 from pydiscogs.cogs.stocks import StockQuote
 
+load_dotenv(override=True)
 events = []
 
 stock_list = [

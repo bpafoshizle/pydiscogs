@@ -8,3 +8,4 @@ polygon-api-client==1.14.2
 yfinance==0.2.46
 ollama==0.4.5
 langchain-ollama==0.2.2
+python-dotenv==1.0.1

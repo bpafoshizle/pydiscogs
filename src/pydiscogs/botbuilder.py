@@ -130,12 +130,14 @@ def add_reddit_cog(bot, cog_properties):
 def add_ai_cog(bot, cog_properties):
     ollama_endpoint = check_and_get_property(cog_properties, "ai", "ollamaEndpoint")
     groq_api_key = check_and_get_property(cog_properties, "ai", "groqAPIKey")
+    groq_llm_model = check_and_get_property(cog_properties, "ai", "groqLLMModel")
     ai_system_prompt = check_and_get_property(cog_properties, "ai", "systemPrompt")
     bot.add_cog(
         AI(
             bot,
             ollama_endpoint,
             groq_api_key,
+            groq_llm_model,
             ai_system_prompt,
         )
     )

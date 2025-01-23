@@ -10,9 +10,11 @@ import unittest
 
 from unittest import IsolatedAsyncioTestCase  # pylint: disable=no-name-in-module
 
+from dotenv import load_dotenv
 from discord.ext import commands
 from pydiscogs.cogs.wotd import WordOfTheDay
 
+load_dotenv(override=True)
 events = []
 
 

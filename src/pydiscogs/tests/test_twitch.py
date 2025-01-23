@@ -14,9 +14,11 @@ import twitchio
 # from icecream import ic
 from unittest import IsolatedAsyncioTestCase  # pylint: disable=no-name-in-module
 
+from dotenv import load_dotenv
 from discord.ext import commands
 from pydiscogs.cogs.twitch import Twitch
 
+load_dotenv(override=True)
 events = []
 
 join_channels_list = ["bpafoshizle", "ephenry84", "elzblazin", "kuhouseii", "fwm_bot"]
