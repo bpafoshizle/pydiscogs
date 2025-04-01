@@ -7,7 +7,11 @@ pyaml-env==1.2.1
 polygon-api-client==1.14.2
 yfinance==0.2.46
 ollama==0.4.5
-langchain-google-genai==2.0.9
+langchain-google-genai==2.0.10
 langchain-groq==0.2.3
 langchain-ollama==0.2.2
+langchain-community==0.3.20
+langgraph==0.3.21
 python-dotenv==1.0.1
+duckduckgo_search==7.5.5
+playwright==1.51.0

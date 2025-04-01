@@ -1,18 +1,19 @@
 import logging
 import os
+import io
+import contextlib
 from httpx import ConnectError
 from typing import List, Dict
 
 import discord
 from discord.ext import commands
 
-from duckduckgo_search import DDGS
-
 from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_groq import ChatGroq
 from langchain_ollama import ChatOllama
-from langchain_core.prompts import ChatPromptTemplate
+from langchain_core.messages import HumanMessage
 from langchain_core.tools import tool
+from langgraph.prebuilt import create_react_agent
 
 
 logger = logging.getLogger(__name__)
@@ -22,6 +23,7 @@ class AI(commands.Cog):
         self,
         bot,
         ollama_endpoint: str = os.getenv("OLLAMA_ENDPOINT"),
+        ollama_llm_model: str = os.getenv("OLLAMA_MODEL"),
         google_api_key: str = os.getenv("GOOGLE_API_KEY"),
         google_llm_model: str = os.getenv("GOOGLE_LLM_MODEL"),
         groq_api_key: str = os.getenv("GROQ_API_KEY"),
@@ -29,7 +31,7 @@ class AI(commands.Cog):
         ai_system_prompt: str = os.getenv("AI_SYSTEM_PROMPT")
     ):
         self.ai_handler = AIHandler(
-            ollama_endpoint, 
+            ollama_endpoint, ollama_llm_model,
             google_api_key, google_llm_model, 
             groq_api_key, groq_llm_model, 
             ai_system_prompt
@@ -63,6 +65,7 @@ class AIReplyModal(discord.ui.Modal):
 class AIHandler():
     def __init__(self,
         ollama_endpoint: str = os.getenv("OLLAMA_ENDPOINT"),
+        ollama_llm_model: str = os.getenv("OLLAMA_LLM_MODEL"),
         google_api_key: str = os.getenv("GOOGLE_API_KEY"),
         google_llm_model: str = os.getenv("GOOGLE_LLM_MODEL"),
         groq_api_key: str = os.getenv("GROQ_API_KEY"),
@@ -75,63 +78,67 @@ class AIHandler():
             )
         
         self.ollama_endpoint = ollama_endpoint
+        self.ollama_llm_model = ollama_llm_model
         self.groq_llm_model = groq_llm_model
         self.google_llm_model = google_llm_model
 
         self.ai_system_prompt = ai_system_prompt
 
         self.tools = self.__get_tools()
-        
-        self.prompt = ChatPromptTemplate.from_messages(
-            [
-                (
-                    "system",
-                    ai_system_prompt,
-                ),
-                ("human", "previous message being replied to: {replied_to_message_content}. New message: {input}"),
-            ]
-        )
 
         self.__setupLLMs()
         
-        self.llm_chain = self.prompt | self.current_llm
 
     async def call(self, input: str, replied_to_message_content: str = ""):
-        prompt_args = {"input": input, "replied_to_message_content": replied_to_message_content}
+        messages = {"messages": [
+            HumanMessage(content=f"previous message being replied to: {replied_to_message_content}"),
+            HumanMessage(content=input)
+        ]}
 
         try:
-            response = await self.llm_chain.ainvoke(prompt_args)
-            logger.debug(f"AI response: {response}")
+            async for step in self.current_agent.astream(
+                    messages,
+                    stream_mode="values",
+                ):
+                    response = step["messages"][-1]
+                    logger.debug("\n" + self.__get_pretty_print_response_string(response))
             return response.content
         except ConnectError as e:
             logger.error(f"Error caught. Using fallback LLM.")
             try:
                 self.__llm_cycle()
-                self.llm_chain = self.prompt | self.current_llm
-                response = await self.llm_chain.ainvoke(prompt_args)
-                logger.debug(f"AI response after fallback: {response}")
-                return response.content
+                # response = await self.current_agent.ainvoke(messages)
+                logger.debug("AI response after fallback: ")
+                async for step in self.current_agent.astream(
+                    messages,
+                    stream_mode="values",
+                ):
+                    response = step["messages"][-1]
+                    logger.debug("\n" + self.__get_pretty_print_response_string(response))
+                
+                return  response.content
             except Exception as e:
                 logger.error(f"Unexpected error caught. Error message: {str(e)}")
                 return "AI Error"
             
     def __setupLLMs(self):
         if self.ollama_endpoint:
-            self.ollama_llm = self.__setupOllamaLLM(self.ollama_endpoint)
-            self.ollama_llm.bind_tools(self.tools)
+            self.ollama_llm = self.__setupOllamaLLM(self.ollama_endpoint, self.ollama_llm_model)
         
         if self.groq_llm_model:
             self.groq_llm = self.__setupGroqLLM(self.groq_llm_model)
-            self.groq_llm.bind_tools(self.tools)
 
         if self.google_llm_model:
             self.google_llm = self.__setupGoogleLLM(self.google_llm_model)
-            self.google_llm.bind_tools(self.tools)
 
-        self.current_llm = self.ollama_llm
-        self.fallback_llms = [self.google_llm, self.groq_llm]
+        self.current_llm = self.google_llm
+        self.fallback_llms = [self.ollama_llm, self.groq_llm]
+        self.current_agent = create_react_agent(
+            self.current_llm, 
+            self.tools, 
+            prompt=self.ai_system_prompt
+        )
 
-    
     def __setupGroqLLM(self, groq_llm_model: str):
         return ChatGroq(
             model=groq_llm_model,
@@ -139,18 +146,19 @@ class AIHandler():
             max_retries=2,
         )
 
-    def __setupOllamaLLM(self, ollama_endpoint: str):
+    def __setupOllamaLLM(self, ollama_endpoint: str, ollama_llm_model: str):
         return ChatOllama(
             base_url=ollama_endpoint,
-            model="llama3.2",
+            model=ollama_llm_model,
             num_predict=330,
             temperature=0,
         )
     
     def __setupGoogleLLM(self, google_llm_model: str):
+        logger.info("Using Google LLM model %s", google_llm_model)
         return ChatGoogleGenerativeAI(
             model=google_llm_model,
-            temperature=0.0,
+            temperature=0,
             max_retries=2,
         )
     
@@ -158,18 +166,47 @@ class AIHandler():
         # Cycle through fallback_llms list, rotating the first element to the end.
         self.current_llm = self.fallback_llms[0]
         self.fallback_llms = self.fallback_llms[1:] + [self.fallback_llms[0]]
+        self.current_agent = create_react_agent(
+            self.current_llm, 
+            self.tools, 
+            prompt=self.ai_system_prompt
+        )
+    
 
     def __get_tools(self):
-        @tool
-        def web_search_text_ddg(query: str) -> List[Dict]:
-            """Search the web for text content using DuckDuckGo."""
-            results = DDGS.text(query, max_results=10)
-            logger.info(results)
-            return 
+        from duckduckgo_search import DDGS
+        from langchain_community.tools import BraveSearch
+        from langchain_community.agent_toolkits import PlayWrightBrowserToolkit
+        from langchain_community.tools.playwright.utils import (
+            create_async_playwright_browser,
+        )
         
         @tool
         def web_search_image_ddg(query: str) -> List[Dict]:
             """Search the web for images using DuckDuckGo."""
-            return DDGS.images(query, max_results=10)
+            return DDGS().images(query, max_results=10)
         
-        return [web_search_text_ddg, web_search_image_ddg]
+        @tool
+        def web_search_text_ddg(query: str) -> List[Dict]:
+            """Search the web for text content using DuckDuckGo."""
+            results = DDGS().text(query, max_results=10)
+            logger.info(results)
+            return results
+        
+        brave_search = BraveSearch.from_api_key(os.getenv("BRAVE_SEARCH_API_KEY"))
+
+        playwright_tools = PlayWrightBrowserToolkit.from_browser(
+            async_browser=create_async_playwright_browser()
+        ).get_tools()
+
+        # return [web_search_text_ddg, web_search_image_ddg]
+        return [brave_search, *playwright_tools]
+    
+    def __get_pretty_print_response_string(self, response):
+        pretty_output = ""
+        # Capture pretty_print output:
+        with io.StringIO() as buf, contextlib.redirect_stdout(buf):
+            response.pretty_print()
+            pretty_output = buf.getvalue()
+        
+        return pretty_output
