@@ -1,7 +1,7 @@
-""" test_wotd.py
-    testing word of the day
+"""test_wotd.py
+ testing word of the day
 
-   isort:skip_file
+isort:skip_file
 """
 
 import asyncio

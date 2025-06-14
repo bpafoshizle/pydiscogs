@@ -1,7 +1,7 @@
-""" test_inspire.py
-    testing
+"""test_inspire.py
+ testing
 
-   isort:skip_file
+isort:skip_file
 """
 
 import unittest

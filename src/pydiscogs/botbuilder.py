@@ -127,11 +127,12 @@ def add_reddit_cog(bot, cog_properties):
         )
     )
 
+
 def add_ai_cog(bot, cog_properties):
     ollama_endpoint = check_and_get_property(cog_properties, "ai", "ollamaEndpoint")
-    ollama_llm_model = check_and_get_property(cog_properties, "ai",  "ollamaLLMModel")
-    google_api_key = check_and_get_property(cog_properties, "ai",  "googleAPIKey")
-    google_llm_model = check_and_get_property(cog_properties, "ai",  "googleLLMModel")
+    ollama_llm_model = check_and_get_property(cog_properties, "ai", "ollamaLLMModel")
+    google_api_key = check_and_get_property(cog_properties, "ai", "googleAPIKey")
+    google_llm_model = check_and_get_property(cog_properties, "ai", "googleLLMModel")
     groq_api_key = check_and_get_property(cog_properties, "ai", "groqAPIKey")
     groq_llm_model = check_and_get_property(cog_properties, "ai", "groqLLMModel")
     ai_system_prompt = check_and_get_property(cog_properties, "ai", "systemPrompt")
