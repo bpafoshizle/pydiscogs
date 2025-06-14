@@ -14,7 +14,17 @@ from langchain_ollama import ChatOllama
 from langchain_core.messages import HumanMessage
 from langchain_core.tools import tool
 from langgraph.prebuilt import create_react_agent
-
+from google.genai import Client
+from pydiscogs.utils.gemini  import (
+    get_citations,
+    get_research_topic,
+    insert_citation_markers,
+    resolve_urls,
+)
+from pydiscogs.utils.prompts import (
+    get_current_date,
+    web_searcher_instructions
+)
 
 logger = logging.getLogger(__name__)
 
@@ -81,6 +91,7 @@ class AIHandler():
         self.ollama_llm_model = ollama_llm_model
         self.groq_llm_model = groq_llm_model
         self.google_llm_model = google_llm_model
+        self.google_api_key = google_api_key
 
         self.ai_system_prompt = ai_system_prompt
 
@@ -193,6 +204,54 @@ class AIHandler():
             logger.info(results)
             return results
         
+        @tool
+        def web_research(query:str):
+            """LangGraph node that performs web research using the native Google Search API tool.
+
+            Executes a web search using the native Google Search API tool in combination with Gemini 2.0 Flash.
+
+            Args:
+                state: Current graph state containing the search query and research loop count
+                config: Configuration for the runnable, including search API settings
+
+            Returns:
+                Dictionary with state update, including sources_gathered, research_loop_count, and web_research_results
+            """
+            # Configure
+            formatted_prompt = web_searcher_instructions.format(
+                current_date=get_current_date(),
+                research_topic=query,
+            )
+
+            genai_client = Client(api_key=self.google_api_key)
+
+            # Uses the google genai client as the langchain client doesn't return grounding metadata
+            response = genai_client.models.generate_content(
+                model=self.google_llm_model,
+                contents=formatted_prompt,
+                config={
+                    "tools": [{"google_search": {}}],
+                    "temperature": 0,
+                },
+            )
+            # resolve the urls to short urls for saving tokens and time
+            resolved_urls = resolve_urls(
+                response.candidates[0].grounding_metadata.grounding_chunks, 1
+            )
+            # Gets the citations and adds them to the generated text
+            citations = get_citations(response, resolved_urls)
+            modified_text = insert_citation_markers(response.text, citations)
+            sources_gathered = [item for citation in citations for item in citation["segments"]]
+
+            data = {
+                "sources_gathered": sources_gathered,
+                "search_query": query,
+                "web_research_result": [modified_text],
+            }
+
+            return data["web_research_result"]
+        
+        
         brave_search = BraveSearch.from_api_key(os.getenv("BRAVE_SEARCH_API_KEY"))
 
         playwright_tools = PlayWrightBrowserToolkit.from_browser(
@@ -200,7 +259,7 @@ class AIHandler():
         ).get_tools()
 
         # return [web_search_text_ddg, web_search_image_ddg]
-        return [brave_search, *playwright_tools]
+        return [web_research, *playwright_tools]
     
     def __get_pretty_print_response_string(self, response):
         pretty_output = ""
