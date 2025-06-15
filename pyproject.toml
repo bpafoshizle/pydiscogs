@@ -9,6 +9,7 @@ build-backend = "setuptools.build_meta"
 black = "*"
 flake8 = "*"
 flake8-pyproject = "*"
+isort = "*"
 
 [tool.pylint.messages_control]
 disable = "C0330, C0326"

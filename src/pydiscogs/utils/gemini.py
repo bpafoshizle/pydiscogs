@@ -1,5 +1,6 @@
 from typing import Any, Dict, List
-from langchain_core.messages import AnyMessage, AIMessage, HumanMessage
+
+from langchain_core.messages import AIMessage, AnyMessage, HumanMessage
 
 
 def get_research_topic(messages: List[AnyMessage]) -> str:

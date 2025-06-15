@@ -1,20 +1,20 @@
+import contextlib
+import io
 import logging
 import os
-import io
-import contextlib
-from httpx import ConnectError
-from typing import List, Dict
+from typing import Dict, List
 
 import discord
 from discord.ext import commands
-
+from google.genai import Client
+from httpx import ConnectError
+from langchain_core.messages import HumanMessage
+from langchain_core.tools import tool
 from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_groq import ChatGroq
 from langchain_ollama import ChatOllama
-from langchain_core.messages import HumanMessage
-from langchain_core.tools import tool
 from langgraph.prebuilt import create_react_agent
-from google.genai import Client
+
 from pydiscogs.utils.gemini import (
     get_citations,
     insert_citation_markers,
@@ -198,6 +198,7 @@ class AIHandler:
 
     def __get_tools(self):
         from duckduckgo_search import DDGS
+
         # from langchain_community.tools import BraveSearch
         from langchain_community.agent_toolkits import PlayWrightBrowserToolkit
         from langchain_community.tools.playwright.utils import (

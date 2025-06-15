@@ -5,12 +5,12 @@ from typing import Optional
 from discord.ext import commands
 from pyaml_env import parse_config
 
+from pydiscogs.cogs.ai import AI
 from pydiscogs.cogs.inspire import InspireQuote
 from pydiscogs.cogs.reddit import Reddit
 from pydiscogs.cogs.stocks import StockQuote
 from pydiscogs.cogs.twitch import Twitch
 from pydiscogs.cogs.wotd import WordOfTheDay
-from pydiscogs.cogs.ai import AI
 
 LOGLEVEL = os.environ.get("LOGLEVEL", "WARNING").upper()
 logging.basicConfig(level=LOGLEVEL)
