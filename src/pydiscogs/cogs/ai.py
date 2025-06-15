@@ -198,7 +198,7 @@ class AIHandler:
 
     def __get_tools(self):
         from duckduckgo_search import DDGS
-        from langchain_community.tools import BraveSearch
+        # from langchain_community.tools import BraveSearch
         from langchain_community.agent_toolkits import PlayWrightBrowserToolkit
         from langchain_community.tools.playwright.utils import (
             create_async_playwright_browser,
@@ -265,7 +265,7 @@ class AIHandler:
 
             return data["web_research_result"]
 
-        #brave_search = BraveSearch.from_api_key(os.getenv("BRAVE_SEARCH_API_KEY"))
+        # brave_search = BraveSearch.from_api_key(os.getenv("BRAVE_SEARCH_API_KEY"))
 
         playwright_tools = PlayWrightBrowserToolkit.from_browser(
             async_browser=create_async_playwright_browser()
