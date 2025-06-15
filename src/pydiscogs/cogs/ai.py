@@ -17,7 +17,6 @@ from langgraph.prebuilt import create_react_agent
 from google.genai import Client
 from pydiscogs.utils.gemini import (
     get_citations,
-    get_research_topic,
     insert_citation_markers,
     resolve_urls,
 )
@@ -129,7 +128,7 @@ class AIHandler:
                 logger.debug("\n" + self.__get_pretty_print_response_string(response))
             return response.content
         except ConnectError as e:
-            logger.error(f"Error caught. Using fallback LLM.")
+            logger.error(f"Error caught: {e}.\nUsing fallback LLM.")
             try:
                 self.__llm_cycle()
                 # response = await self.current_agent.ainvoke(messages)
@@ -266,7 +265,7 @@ class AIHandler:
 
             return data["web_research_result"]
 
-        brave_search = BraveSearch.from_api_key(os.getenv("BRAVE_SEARCH_API_KEY"))
+        #brave_search = BraveSearch.from_api_key(os.getenv("BRAVE_SEARCH_API_KEY"))
 
         playwright_tools = PlayWrightBrowserToolkit.from_browser(
             async_browser=create_async_playwright_browser()
