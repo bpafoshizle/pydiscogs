@@ -67,3 +67,13 @@ curl http://bpapc.lan:11434/api/generate -d '{
   "stream": false
 }'
 ```
+
+## Run Superlinter Locally (once they get an arm container image, this would work...)
+```bash
+docker run \
+  -e LOG_LEVEL=DEBUG \
+  -e RUN_LOCAL=true \
+  -v .:/tmp/lint \
+  --rm \
+  ghcr.io/super-linter/super-linter:latest
+```
