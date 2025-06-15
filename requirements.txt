@@ -6,7 +6,7 @@ tweepy[async]==4.12.1
 pyaml-env==1.2.1
 polygon-api-client==1.14.2
 yfinance==0.2.46
-ollama==0.4.5
+ollama==0.5.1
 langchain-google-genai==2.0.10
 langchain-groq==0.2.3
 langchain-ollama==0.2.2
