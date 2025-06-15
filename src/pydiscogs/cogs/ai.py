@@ -15,11 +15,7 @@ from langchain_groq import ChatGroq
 from langchain_ollama import ChatOllama
 from langgraph.prebuilt import create_react_agent
 
-from pydiscogs.utils.gemini import (
-    get_citations,
-    insert_citation_markers,
-    resolve_urls,
-)
+from pydiscogs.utils.gemini import get_citations, insert_citation_markers, resolve_urls
 from pydiscogs.utils.prompts import get_current_date, web_searcher_instructions
 
 logger = logging.getLogger(__name__)
