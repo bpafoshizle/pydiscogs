@@ -44,5 +44,9 @@ cogs:
   - name: ai
     properties: 
       ollamaEndpoint:  !ENV ${OLLAMA_ENDPOINT}
+      ollamaLLMModel: !ENV ${OLLAMA_LLM_MODEL}
+      googleAPIKey: !ENV  ${GOOGLE_API_KEY}
+      googleLLMModel: !ENV ${GOOGLE_LLM_MODEL}
       groqAPIKey:  !ENV ${GROQ_API_KEY:}
+      groqLLMModel: !ENV ${GROQ_LLM_MODEL}
       systemPrompt: !ENV ${AI_SYSTEM_PROMPT}
