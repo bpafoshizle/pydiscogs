@@ -30,6 +30,9 @@ jobs:
           export GFYCAT_CLIENT_ID=\"${{ secrets.GFYCAT_CLIENT_ID }}\"
           export GFYCAT_CLIENT_SECRET=\"${{ secrets.GFYCAT_CLIENT_SECRET }}\"
           export DSCRD_CHNL_GENERAL=\"${{ secrets.DSCRD_CHNL_GENERAL }}\"
+          export OLLAMA_ENDPOINT=\"${{ secrets.OLLAMA_ENDPOINT  }}\"
+          export GROQ_API_KEY=\"${{ secrets.GROQ_API_KEY  }}\"
+          export AI_SYSTEM_PROMPT=\"${{ secrets.AI_SYSTEM_PROMPT }}\"
           playwright install
           "
           # Write the commands to a file
