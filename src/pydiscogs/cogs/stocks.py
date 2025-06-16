@@ -119,7 +119,7 @@ class StockQuote(commands.Cog):
 
         # Safely handle missing 'Earnings Date' in the 'calendar' dictionary
         try:
-            earnings_date = ticker.calendar["Earnings Date"][0]
+            earnings_date = ticker.calendar["Earnings Date"][0].strftime("%Y-%m-%d")
         except (KeyError, IndexError):
             earnings_date = "N/A"
 

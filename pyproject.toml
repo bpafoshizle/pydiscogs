@@ -1,9 +1,12 @@
 [build-system]
-requires = [
-    "setuptools>=42",
-    "wheel"
-]
+requires = ["setuptools>=42", "wheel"]
 build-backend = "setuptools.build_meta"
+
+[tool.poetry.dev-dependencies]
+black = "*"
+flake8 = "*"
+flake8-pyproject = "*"
+isort = "*"
 
 [tool.pylint.messages_control]
 disable = "C0330, C0326"
@@ -13,3 +16,8 @@ max-line-length = "88"
 
 [tool.black]
 line-length = 88
+
+[tool.flake8]
+max-line-length = 88
+ignore = ["E501", "W503"]
+exclude = ["news.py", "prompts.py", "venv/*"]

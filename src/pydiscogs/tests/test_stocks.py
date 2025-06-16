@@ -1,7 +1,7 @@
-""" test_wotd.py
-    testing word of the day
+"""test_wotd.py
+ testing word of the day
 
-   isort:skip_file
+isort:skip_file
 """
 
 import asyncio
@@ -11,9 +11,11 @@ import unittest
 # from icecream import ic
 from unittest import IsolatedAsyncioTestCase  # pylint: disable=no-name-in-module
 
+from dotenv import load_dotenv
 from discord.ext import commands
 from pydiscogs.cogs.stocks import StockQuote
 
+load_dotenv(override=True)
 events = []
 
 stock_list = [
@@ -63,7 +65,7 @@ class TestStockQuote(IsolatedAsyncioTestCase):
             pctchange,
             quotetime,
             earnings_date,
-        ) = await self.stock_cog.getLatestStockQuote("VTSAX")
+        ) = await self.stock_cog.getLatestStockQuote("AAPL")
         # ic(symbol, name, lastprice, change, quotetime)
         self.assertTrue(isinstance(symbol, str))
         self.assertGreater(len(symbol), 0)
@@ -88,7 +90,7 @@ class TestStockQuote(IsolatedAsyncioTestCase):
         """
         events.append("test_getPrevClose_returns_proper_response")
         (symbol, prev_close, prev_high, prev_low) = await self.stock_cog.getPrevClose(
-            "SPY"
+            "AAPL"
         )
         # ic((symbol, prev_close, prev_high, prev_low))
         self.assertTrue(isinstance(symbol, str))

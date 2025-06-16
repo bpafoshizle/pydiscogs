@@ -1,13 +1,14 @@
-""" test_botbuilder.py
-    testing bot builder
+"""test_botbuilder.py
+ testing bot builder
 
-   isort:skip_file
+isort:skip_file
 """
 
 import logging
 import unittest
 import warnings
 
+from dotenv import load_dotenv
 from pydiscogs import botbuilder
 from pydiscogs.cogs.inspire import InspireQuote
 from pydiscogs.cogs.wotd import WordOfTheDay
@@ -16,6 +17,7 @@ from pydiscogs.cogs.twitch import Twitch
 from pydiscogs.cogs.reddit import Reddit
 
 logging.disable(logging.CRITICAL)
+load_dotenv(override=True)
 
 
 class TestBotBuilder(unittest.TestCase):

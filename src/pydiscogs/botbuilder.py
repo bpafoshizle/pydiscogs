@@ -5,6 +5,7 @@ from typing import Optional
 from discord.ext import commands
 from pyaml_env import parse_config
 
+from pydiscogs.cogs.ai import AI
 from pydiscogs.cogs.inspire import InspireQuote
 from pydiscogs.cogs.reddit import Reddit
 from pydiscogs.cogs.stocks import StockQuote
@@ -51,6 +52,8 @@ def build_bot(yaml_config="./tests/testbot.yaml"):
             add_twitch_cog(bot, cog_properties)
         elif cog_name == "reddit":
             add_reddit_cog(bot, cog_properties)
+        elif cog_name == "ai":
+            add_ai_cog(bot, cog_properties)
 
     bot.discord_token = discord_token
     # logging.info("running bot: %s", bot)
@@ -121,5 +124,27 @@ def add_reddit_cog(bot, cog_properties):
             reddit_password,
             subreddit_list,
             post_channel_id,
+        )
+    )
+
+
+def add_ai_cog(bot, cog_properties):
+    ollama_endpoint = check_and_get_property(cog_properties, "ai", "ollamaEndpoint")
+    ollama_llm_model = check_and_get_property(cog_properties, "ai", "ollamaLLMModel")
+    google_api_key = check_and_get_property(cog_properties, "ai", "googleAPIKey")
+    google_llm_model = check_and_get_property(cog_properties, "ai", "googleLLMModel")
+    groq_api_key = check_and_get_property(cog_properties, "ai", "groqAPIKey")
+    groq_llm_model = check_and_get_property(cog_properties, "ai", "groqLLMModel")
+    ai_system_prompt = check_and_get_property(cog_properties, "ai", "systemPrompt")
+    bot.add_cog(
+        AI(
+            bot,
+            ollama_endpoint,
+            ollama_llm_model,
+            google_api_key,
+            google_llm_model,
+            groq_api_key,
+            groq_llm_model,
+            ai_system_prompt,
         )
     )
