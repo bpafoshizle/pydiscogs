@@ -32,8 +32,16 @@ jobs:
           export DSCRD_CHNL_GENERAL=\"${{ secrets.DSCRD_CHNL_GENERAL }}\"
           export OLLAMA_ENDPOINT=\"${{ secrets.OLLAMA_ENDPOINT  }}\"
           export GROQ_API_KEY=\"${{ secrets.GROQ_API_KEY  }}\"
+          export GROQ_LLM_MODEL=\"${{ secrets.GROQ_LLM_MODEL  }}\"
           export AI_SYSTEM_PROMPT=\"${{ secrets.AI_SYSTEM_PROMPT }}\"
+          export OLLAMA_LLM_MODEL=\"${{ secrets.OLLAMA_LLM_MODEL }}\"
+          export GEMINI_API_KEY=\"${{ secrets.GEMINI_API_KEY }}\"
+          export GOOGLE_API_KEY=\"${{ secrets.GOOGLE_API_KEY }}\"
+          export GOOGLE_LLM_MODEL=\"${{ secrets.GOOGLE_LLM_MODEL }}\"
+          export BRAVE_SEARCH_API_KEY=\"${{ secrets.BRAVE_SEARCH_API_KEY }}\"
+
           playwright install
+          
           "
           # Write the commands to a file
           echo "$commands" > test-environment.sh
