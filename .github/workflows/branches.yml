@@ -30,6 +30,7 @@ jobs:
           export GFYCAT_CLIENT_ID=\"${{ secrets.GFYCAT_CLIENT_ID }}\"
           export GFYCAT_CLIENT_SECRET=\"${{ secrets.GFYCAT_CLIENT_SECRET }}\"
           export DSCRD_CHNL_GENERAL=\"${{ secrets.DSCRD_CHNL_GENERAL }}\"
+          playwright install
           "
           # Write the commands to a file
           echo "$commands" > test-environment.sh
