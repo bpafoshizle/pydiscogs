@@ -48,3 +48,10 @@ line-length = 88
 max-line-length = 88
 ignore = ["E501", "W503"]
 exclude = ["news.py", "prompts.py", "venv/*"]
+
+[dependency-groups]
+dev = [
+    "black>=25.1.0",
+    "flake8>=7.3.0",
+    "isort>=6.0.1",
+]

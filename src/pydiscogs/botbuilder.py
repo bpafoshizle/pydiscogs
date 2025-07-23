@@ -2,9 +2,6 @@ import logging
 import os
 
 import discord
-
-from typing import Optional
-
 from discord.ext import commands
 from pyaml_env import parse_config
 
@@ -20,7 +17,7 @@ logging.basicConfig(level=LOGLEVEL)
 
 
 def build_bot(yaml_config="./tests/testbot.yaml"):
-    
+
     intents = discord.Intents.default()
     intents.message_content = (
         True  # < This may give you `read-only` warning, just ignore it.
@@ -33,7 +30,9 @@ def build_bot(yaml_config="./tests/testbot.yaml"):
     guild_ids = config.get("guildIds")
     assert guild_ids, "guildIds is a required configuration value"
 
-    bot = commands.Bot(command_prefix=config["commandPrefix"], debug_guilds=guild_ids, intents=intents)
+    bot = commands.Bot(
+        command_prefix=config["commandPrefix"], debug_guilds=guild_ids, intents=intents
+    )
 
     discord_token = config["discordToken"]
     assert discord_token, "discordToken is a required configuration value"
