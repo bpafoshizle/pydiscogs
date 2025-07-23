@@ -45,7 +45,7 @@ class AI(commands.Cog):
         self.bot = bot
 
     @commands.slash_command()
-    async def ai(self, ctx: discord.ApplicationContext, input: str):
+    async def ask_ai(self, ctx: discord.ApplicationContext, input: str):
         await ctx.defer()
         response = await self.ai_handler.call(input)
         await ctx.respond(response)
@@ -58,7 +58,32 @@ class AI(commands.Cog):
             message_content=message.content,
         )
         await ctx.send_modal(modal)
+    
+    @commands.command()
+    async def ai(self, ctx, *, input: str):
+        replied_to_message_content = None
+        if ctx.message.reference:
+            replied_to_message_content = (await ctx.fetch_message(ctx.message.reference.message_id)).content
+        response = await self.ai_handler.call(input, replied_to_message_content)
+        await ctx.send(response)
 
+    @commands.Cog.listener()
+    async def on_message(self, message: discord.Message):
+        # Ignore messages sent by the bot itself
+        if message.author.id == self.bot.user.id:
+            return
+        
+         # Check if the bot was mentioned in the message
+        if self.bot.user in message.mentions: 
+            #await message.reply("Thanks for mentioning me!")  # Reply to the message
+            replied_to_message_content = None
+            if message.reference:
+                replied_to_message_content = (await message.channel.fetch_message(message.reference.message_id)).content
+            response = await self.ai_handler.call(message.content, replied_to_message_content)
+            await message.reply(response)
+
+        # Allow other listeners and commands to process the message
+        # await self.bot.process_commands(message)
 
 class AIReplyModal(discord.ui.Modal):
     def __init__(self, *args, ai_handler, message_content, **kwargs) -> None:
