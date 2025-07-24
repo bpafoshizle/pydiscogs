@@ -31,7 +31,7 @@ class Twitch(commands.Cog):
         self.discord_bot = bot
         self.user_data = None
         self.discord_post_channel_id = discord_post_channel_id
-        self.twitch_client = twitchio.Client.from_client_credentials(
+        self.twitch_client = twitchio.Client(
             client_id=twitch_bot_client_id, client_secret=twitch_bot_client_secret
         )
 
@@ -174,7 +174,7 @@ class Twitch(commands.Cog):
         return await self.twitch_client.fetch_users(users)
 
     async def get_live_channels(self, query: str = "e"):
-        return await self.twitch_client.search_channels(query, live_only=True)
+        return await self.twitch_client.search_channels(query, live=True)
 
     async def get_stream_data(self, channels):
-        return await self.twitch_client.fetch_streams(user_logins=channels)
+        return await self.twitch_client.fetch_streams(user_ids=channels)

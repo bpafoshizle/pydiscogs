@@ -1,11 +1,12 @@
 [project]
 name = "pydiscogs"
-version = "0.1.0"
-description = "Add your description here"
+version = "0.2.0"
+description = "A collection of cogs that can be used to add functionality to a Discord.py bot"
 readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
     "asyncpraw==7.8.1",
+    "audioop-lts>=0.2.1",
     "duckduckgo-search==7.5.5",
     "google-genai==1.20.0",
     "langchain-community==0.3.20",

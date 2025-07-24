@@ -7,6 +7,7 @@ isort:skip_file
 import logging
 import unittest
 import warnings
+from unittest import IsolatedAsyncioTestCase
 
 from dotenv import load_dotenv
 from pydiscogs import botbuilder
@@ -20,7 +21,7 @@ logging.disable(logging.CRITICAL)
 load_dotenv(override=True)
 
 
-class TestBotBuilder(unittest.TestCase):
+class TestBotBuilder(IsolatedAsyncioTestCase):
     def setUp(self):
         warnings.simplefilter("ignore", category=DeprecationWarning)
         self.bot = botbuilder.build_bot("./src/pydiscogs/tests/testbot.yaml")

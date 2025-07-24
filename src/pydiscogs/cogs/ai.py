@@ -2,7 +2,6 @@ import contextlib
 import io
 import logging
 import os
-from typing import Dict, List
 
 import discord
 from discord.ext import commands
@@ -225,25 +224,6 @@ class AIHandler:
         )
 
     def __get_tools(self):
-        from duckduckgo_search import DDGS
-
-        # from langchain_community.tools import BraveSearch
-        from langchain_community.agent_toolkits import PlayWrightBrowserToolkit
-        from langchain_community.tools.playwright.utils import (
-            create_async_playwright_browser,
-        )
-
-        @tool
-        def web_search_image_ddg(query: str) -> List[Dict]:
-            """Search the web for images using DuckDuckGo."""
-            return DDGS().images(query, max_results=10)
-
-        @tool
-        def web_search_text_ddg(query: str) -> List[Dict]:
-            """Search the web for text content using DuckDuckGo."""
-            results = DDGS().text(query, max_results=10)
-            logger.info(results)
-            return results
 
         @tool
         def web_research(query: str):
@@ -294,14 +274,8 @@ class AIHandler:
 
             return data["web_research_result"]
 
-        # brave_search = BraveSearch.from_api_key(os.getenv("BRAVE_SEARCH_API_KEY"))
-
-        playwright_tools = PlayWrightBrowserToolkit.from_browser(
-            async_browser=create_async_playwright_browser()
-        ).get_tools()
-
         # return [web_search_text_ddg, web_search_image_ddg]
-        return [web_research, *playwright_tools]
+        return [web_research]
 
     def __get_pretty_print_response_string(self, response):
         pretty_output = ""
