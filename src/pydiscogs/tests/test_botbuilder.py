@@ -16,6 +16,7 @@ from pydiscogs.cogs.wotd import WordOfTheDay
 from pydiscogs.cogs.stocks import StockQuote
 from pydiscogs.cogs.twitch import Twitch
 from pydiscogs.cogs.reddit import Reddit
+from pydiscogs.cogs.ai import AI
 
 logging.disable(logging.CRITICAL)
 load_dotenv(override=True)
@@ -45,6 +46,10 @@ class TestBotBuilder(IsolatedAsyncioTestCase):
     def test_Reddit_cog_created(self):
         cog = self.bot.cogs.get("Reddit")
         self.assertTrue(isinstance(cog, Reddit))
+
+    def test_AI_cog_created(self):
+        cog = self.bot.cogs.get("AI")
+        self.assertTrue(isinstance(cog, AI))
 
 
 if __name__ == "__main__":

@@ -173,21 +173,32 @@ class AIHandler:
             except Exception as e:
                 logger.error(f"Unexpected error caught. Error message: {str(e)}")
                 return "AI Error"
+        except Exception as e:
+            logger.error(f"Unexpected error caught. Error message: {str(e)}")
+            return "AI Error"
 
     def __setupLLMs(self):
         if self.ollama_endpoint:
             self.ollama_llm = self.__setupOllamaLLM(
                 self.ollama_endpoint, self.ollama_llm_model
             )
+        else:
+            self.ollama_llm = None
 
         if self.groq_llm_model:
             self.groq_llm = self.__setupGroqLLM(self.groq_llm_model)
+        else:
+            self.groq_llm = None
 
         if self.google_llm_model:
             self.google_llm = self.__setupGoogleLLM(self.google_llm_model)
+        else:
+            self.google_llm = None
 
-        self.current_llm = self.google_llm
-        self.fallback_llms = [self.ollama_llm, self.groq_llm]
+        llms = [self.google_llm, self.ollama_llm, self.groq_llm]
+        self.current_llm = next((llm for llm in llms if llm),  None)
+        self.fallback_llms = [llm for llm in llms if llm != self.current_llm and llm is not None]
+
         self.current_agent = create_react_agent(
             self.current_llm, self.tools, prompt=self.ai_system_prompt
         )
