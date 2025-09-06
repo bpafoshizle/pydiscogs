@@ -196,8 +196,10 @@ class AIHandler:
             self.google_llm = None
 
         llms = [self.google_llm, self.ollama_llm, self.groq_llm]
-        self.current_llm = next((llm for llm in llms if llm),  None)
-        self.fallback_llms = [llm for llm in llms if llm != self.current_llm and llm is not None]
+        self.current_llm = next((llm for llm in llms if llm), None)
+        self.fallback_llms = [
+            llm for llm in llms if llm != self.current_llm and llm is not None
+        ]
 
         self.current_agent = create_react_agent(
             self.current_llm, self.tools, prompt=self.ai_system_prompt
