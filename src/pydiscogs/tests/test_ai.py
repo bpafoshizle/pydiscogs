@@ -26,7 +26,7 @@ class TestAIHandler(unittest.IsolatedAsyncioTestCase):
         self, MockChatGoogleGenerativeAI, mock_getenv
     ):
 
-        mock_getenv.side_effect = lambda key, default=None: {}.get(key, default)
+        mock_getenv.return_value = None
 
         # Test AIHandler initialization with Google LLM
         ai_handler = AIHandler(
@@ -40,7 +40,7 @@ class TestAIHandler(unittest.IsolatedAsyncioTestCase):
     @patch("pydiscogs.cogs.ai.ChatOllama")
     def test_ai_handler_initialization_ollama(self, MockChatOllama, mock_getenv):
 
-        mock_getenv.side_effect = lambda key, default=None: {}.get(key, default)
+        mock_getenv.return_value = None
 
         # Test AIHandler initialization with Ollama LLM
         ai_handler = AIHandler(
@@ -52,7 +52,7 @@ class TestAIHandler(unittest.IsolatedAsyncioTestCase):
     @patch("pydiscogs.cogs.ai.ChatGroq")
     def test_ai_handler_initialization_groq(self, MockChatGroq, mock_getenv):
 
-        mock_getenv.side_effect = lambda key, default=None: {}.get(key, default)
+        mock_getenv.return_value = None
 
         # Test AIHandler initialization with Groq LLM
         ai_handler = AIHandler(
@@ -64,7 +64,7 @@ class TestAIHandler(unittest.IsolatedAsyncioTestCase):
     @patch("os.getenv")
     def test_ai_handler_initialization_no_llm(self, mock_getenv):
 
-        mock_getenv.side_effect = lambda key, default=None: {}.get(key, default)
+        mock_getenv.return_value = None
 
         # Test AIHandler initialization with no LLM specified
         with self.assertRaises(ValueError):
@@ -76,7 +76,7 @@ class TestAIHandler(unittest.IsolatedAsyncioTestCase):
     async def test_ai_handler_call(
         self, MockChatGoogleGenerativeAI, mock_create_react_agent, mock_getenv
     ):
-        mock_getenv.side_effect = lambda key, default=None: {}.get(key, default)
+        mock_getenv.return_value = None
 
         async def mock_astream():
             yield {"messages": [AIMessage("test response")]}
@@ -98,7 +98,7 @@ class TestAIHandler(unittest.IsolatedAsyncioTestCase):
         self, MockChatGoogleGenerativeAI, mock_create_react_agent, mock_getenv
     ):
 
-        mock_getenv.side_effect = lambda key, default=None: {}.get(key, default)
+        mock_getenv.return_value = None
 
         # Test AIHandler.call method with fallback
         mock_llm = MockChatGoogleGenerativeAI.return_value
@@ -126,7 +126,7 @@ class TestAIHandler(unittest.IsolatedAsyncioTestCase):
     async def test_ai_handler_call_unexpected_error(
         self, MockChatGoogleGenerativeAI, mock_create_react_agent, mock_getenv
     ):
-        mock_getenv.side_effect = lambda key, default=None: {}.get(key, default)
+        mock_getenv.return_value = None
 
         mock_create_react_agent.return_value.astream.side_effect = Exception(
             "initial call failed"
