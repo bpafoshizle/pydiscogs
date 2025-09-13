@@ -146,3 +146,6 @@ sensitive/
 
 # TwitchIO tokens
 .tio.tokens.json
+
+# Continue
+.continue/

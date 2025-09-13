@@ -20,6 +20,7 @@ events = []
 
 
 class TestAIHandler(unittest.IsolatedAsyncioTestCase):
+    @patch.dict(os.environ, clear=True)
     @patch("pydiscogs.cogs.ai.ChatGoogleGenerativeAI")
     def test_ai_handler_initialization_google(self, MockChatGoogleGenerativeAI):
         # Test AIHandler initialization with Google LLM
@@ -30,6 +31,7 @@ class TestAIHandler(unittest.IsolatedAsyncioTestCase):
             ai_handler.current_llm, type(MockChatGoogleGenerativeAI.return_value)
         )
 
+    @patch.dict(os.environ, clear=True)
     @patch("pydiscogs.cogs.ai.ChatOllama")
     def test_ai_handler_initialization_ollama(self, MockChatOllama):
         # Test AIHandler initialization with Ollama LLM
@@ -38,23 +40,25 @@ class TestAIHandler(unittest.IsolatedAsyncioTestCase):
         )
         self.assertIsInstance(ai_handler.current_llm, type(MockChatOllama.return_value))
 
+    @patch.dict(os.environ, clear=True)
     @patch("pydiscogs.cogs.ai.ChatGroq")
     def test_ai_handler_initialization_groq(self, MockChatGroq):
         # Test AIHandler initialization with Groq LLM
         ai_handler = AIHandler(groq_api_key="test_api_key", groq_llm_model="test_model")
         self.assertIsInstance(ai_handler.current_llm, type(MockChatGroq.return_value))
 
+    @patch.dict(os.environ, clear=True)
     def test_ai_handler_initialization_no_llm(self):
         # Test AIHandler initialization with no LLM specified
         with self.assertRaises(ValueError):
             AIHandler()
 
+    @patch.dict(os.environ, clear=True)
     @patch("pydiscogs.cogs.ai.create_react_agent")
     @patch("pydiscogs.cogs.ai.ChatGoogleGenerativeAI")
     async def test_ai_handler_call(
         self, MockChatGoogleGenerativeAI, mock_create_react_agent
     ):
-
         async def mock_astream():
             yield {"messages": [AIMessage("test response")]}
 
@@ -67,11 +71,14 @@ class TestAIHandler(unittest.IsolatedAsyncioTestCase):
         response = await ai_handler.call("test input")
         self.assertEqual(response, "test response")
 
+    @patch.dict(os.environ, clear=True)
     @patch("pydiscogs.cogs.ai.create_react_agent")
     @patch("pydiscogs.cogs.ai.ChatGoogleGenerativeAI")
     async def test_ai_handler_call_fallback(
         self, MockChatGoogleGenerativeAI, mock_create_react_agent
     ):
+        os.environ["GOOGLE_API_KEY"] = "test_google_api_key"
+        os.environ["GOOGLE_LLM_MODEL"] = "test_model"
         # Test AIHandler.call method with fallback
         mock_llm = MockChatGoogleGenerativeAI.return_value
 
@@ -91,6 +98,7 @@ class TestAIHandler(unittest.IsolatedAsyncioTestCase):
         response = await ai_handler.call("test input")
         self.assertEqual(response, "test response")
 
+    @patch.dict(os.environ, clear=True)
     @patch("pydiscogs.cogs.ai.create_react_agent")
     @patch("pydiscogs.cogs.ai.ChatGoogleGenerativeAI")
     async def test_ai_handler_call_unexpected_error(
@@ -108,6 +116,7 @@ class TestAIHandler(unittest.IsolatedAsyncioTestCase):
         response = await ai_handler.call("test input")
         self.assertEqual(response, "AI Error")
 
+    @patch.dict(os.environ, clear=True)
     @patch("pydiscogs.cogs.ai.Client")
     def test_web_research_tool(self, MockClient):
         # Test web_research tool
