@@ -96,8 +96,6 @@ class TestAIHandler(unittest.IsolatedAsyncioTestCase):
     async def test_ai_handler_call_unexpected_error(
         self, MockChatGoogleGenerativeAI, mock_create_react_agent
     ):
-        # Test AIHandler.call method with unexpected error
-        mock_llm = MockChatGoogleGenerativeAI.return_value
         mock_create_react_agent.return_value.astream.side_effect = Exception(
             "initial call failed"
         )
