@@ -44,7 +44,11 @@ class TestAIHandler(unittest.IsolatedAsyncioTestCase):
     @patch("pydiscogs.cogs.ai.ChatGroq")
     def test_ai_handler_initialization_groq(self, MockChatGroq):
         # Test AIHandler initialization with Groq LLM
-        ai_handler = AIHandler(groq_api_key="test_api_key", groq_llm_model="test_model")
+        ai_handler = AIHandler(
+            groq_api_key="test_api_key",
+            groq_llm_model="test_model",
+            google_llm_model=None,
+        )
         self.assertIsInstance(ai_handler.current_llm, type(MockChatGroq.return_value))
 
     @patch.dict(os.environ, clear=True)
@@ -65,7 +69,9 @@ class TestAIHandler(unittest.IsolatedAsyncioTestCase):
         mock_create_react_agent.return_value.astream.return_value = mock_astream()
 
         ai_handler = AIHandler(
-            google_api_key="test_google_api_key", google_llm_model="test_model"
+            google_api_key="test_google_api_key",
+            google_llm_model="test_model",
+            groq_llm_model=None,
         )
         ai_handler.current_agent = mock_create_react_agent.return_value
         response = await ai_handler.call("test input")
@@ -77,8 +83,6 @@ class TestAIHandler(unittest.IsolatedAsyncioTestCase):
     async def test_ai_handler_call_fallback(
         self, MockChatGoogleGenerativeAI, mock_create_react_agent
     ):
-        os.environ["GOOGLE_API_KEY"] = "test_google_api_key"
-        os.environ["GOOGLE_LLM_MODEL"] = "test_model"
         # Test AIHandler.call method with fallback
         mock_llm = MockChatGoogleGenerativeAI.return_value
 
@@ -91,7 +95,9 @@ class TestAIHandler(unittest.IsolatedAsyncioTestCase):
         ]
 
         ai_handler = AIHandler(
-            google_api_key="test_google_api_key", google_llm_model="test_model"
+            google_api_key="test_google_api_key",
+            google_llm_model="test_model",
+            groq_llm_model=None,
         )
         ai_handler.current_agent = mock_create_react_agent.return_value
         ai_handler.fallback_llms = [mock_llm]  # Set up a fallback LLM
@@ -109,7 +115,9 @@ class TestAIHandler(unittest.IsolatedAsyncioTestCase):
         )
 
         ai_handler = AIHandler(
-            google_api_key="test_google_api_key", google_llm_model="test_model"
+            google_api_key="test_google_api_key",
+            google_llm_model="test_model",
+            groq_llm_model=None,
         )
         ai_handler.current_agent = mock_create_react_agent.return_value
         ai_handler.fallback_llms = []  # No fallback LLMs to trigger unexpected error
@@ -121,7 +129,9 @@ class TestAIHandler(unittest.IsolatedAsyncioTestCase):
     def test_web_research_tool(self, MockClient):
         # Test web_research tool
         ai_handler = AIHandler(
-            google_api_key="test_google_api_key", google_llm_model="test_model"
+            google_api_key="test_google_api_key",
+            google_llm_model="test_model",
+            groq_llm_model=None,
         )
         mock_response = MagicMock()
         mock_response.candidates = [MagicMock()]
