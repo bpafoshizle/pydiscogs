@@ -54,8 +54,6 @@ class TestAIHandler(unittest.IsolatedAsyncioTestCase):
     async def test_ai_handler_call(
         self, MockChatGoogleGenerativeAI, mock_create_react_agent
     ):
-        # Test AIHandler.call method
-        mock_llm = MockChatGoogleGenerativeAI.return_value
 
         async def mock_astream():
             yield {"messages": [AIMessage("test response")]}
