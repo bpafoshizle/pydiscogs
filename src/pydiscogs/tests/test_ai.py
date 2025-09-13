@@ -47,7 +47,7 @@ class TestAIHandler(unittest.IsolatedAsyncioTestCase):
         ai_handler = AIHandler(
             groq_api_key="test_api_key",
             groq_llm_model="test_model",
-            google_llm_model=None,
+            google_llm_model=False,
         )
         self.assertIsInstance(ai_handler.current_llm, type(MockChatGroq.return_value))
 
@@ -71,7 +71,7 @@ class TestAIHandler(unittest.IsolatedAsyncioTestCase):
         ai_handler = AIHandler(
             google_api_key="test_google_api_key",
             google_llm_model="test_model",
-            groq_llm_model=None,
+            groq_llm_model=False,
         )
         ai_handler.current_agent = mock_create_react_agent.return_value
         response = await ai_handler.call("test input")
@@ -97,7 +97,7 @@ class TestAIHandler(unittest.IsolatedAsyncioTestCase):
         ai_handler = AIHandler(
             google_api_key="test_google_api_key",
             google_llm_model="test_model",
-            groq_llm_model=None,
+            groq_llm_model=False,
         )
         ai_handler.current_agent = mock_create_react_agent.return_value
         ai_handler.fallback_llms = [mock_llm]  # Set up a fallback LLM
@@ -117,7 +117,7 @@ class TestAIHandler(unittest.IsolatedAsyncioTestCase):
         ai_handler = AIHandler(
             google_api_key="test_google_api_key",
             google_llm_model="test_model",
-            groq_llm_model=None,
+            groq_llm_model=False,
         )
         ai_handler.current_agent = mock_create_react_agent.return_value
         ai_handler.fallback_llms = []  # No fallback LLMs to trigger unexpected error
@@ -131,7 +131,7 @@ class TestAIHandler(unittest.IsolatedAsyncioTestCase):
         ai_handler = AIHandler(
             google_api_key="test_google_api_key",
             google_llm_model="test_model",
-            groq_llm_model=None,
+            groq_llm_model=False,
         )
         mock_response = MagicMock()
         mock_response.candidates = [MagicMock()]
