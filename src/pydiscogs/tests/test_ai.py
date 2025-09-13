@@ -22,10 +22,11 @@ events = []
 class TestAIHandler(unittest.IsolatedAsyncioTestCase):
     @patch("os.getenv")
     @patch("pydiscogs.cogs.ai.ChatGoogleGenerativeAI")
-    def test_ai_handler_initialization_google(self, MockChatGoogleGenerativeAI, mock_getenv):
+    def test_ai_handler_initialization_google(
+        self, MockChatGoogleGenerativeAI, mock_getenv
+    ):
 
-        mock_getenv.side_effect = lambda key, default=None: {
-        }.get(key, default)
+        mock_getenv.side_effect = lambda key, default=None: {}.get(key, default)
 
         # Test AIHandler initialization with Google LLM
         ai_handler = AIHandler(
@@ -38,9 +39,8 @@ class TestAIHandler(unittest.IsolatedAsyncioTestCase):
     @patch("os.getenv")
     @patch("pydiscogs.cogs.ai.ChatOllama")
     def test_ai_handler_initialization_ollama(self, MockChatOllama, mock_getenv):
-        
-        mock_getenv.side_effect = lambda key, default=None: {
-        }.get(key, default)
+
+        mock_getenv.side_effect = lambda key, default=None: {}.get(key, default)
 
         # Test AIHandler initialization with Ollama LLM
         ai_handler = AIHandler(
@@ -52,8 +52,7 @@ class TestAIHandler(unittest.IsolatedAsyncioTestCase):
     @patch("pydiscogs.cogs.ai.ChatGroq")
     def test_ai_handler_initialization_groq(self, MockChatGroq, mock_getenv):
 
-        mock_getenv.side_effect = lambda key, default=None: {
-        }.get(key, default)
+        mock_getenv.side_effect = lambda key, default=None: {}.get(key, default)
 
         # Test AIHandler initialization with Groq LLM
         ai_handler = AIHandler(
@@ -65,8 +64,7 @@ class TestAIHandler(unittest.IsolatedAsyncioTestCase):
     @patch("os.getenv")
     def test_ai_handler_initialization_no_llm(self, mock_getenv):
 
-        mock_getenv.side_effect = lambda key, default=None: {
-        }.get(key, default)
+        mock_getenv.side_effect = lambda key, default=None: {}.get(key, default)
 
         # Test AIHandler initialization with no LLM specified
         with self.assertRaises(ValueError):
@@ -78,8 +76,7 @@ class TestAIHandler(unittest.IsolatedAsyncioTestCase):
     async def test_ai_handler_call(
         self, MockChatGoogleGenerativeAI, mock_create_react_agent, mock_getenv
     ):
-        mock_getenv.side_effect = lambda key, default=None: {
-        }.get(key, default)
+        mock_getenv.side_effect = lambda key, default=None: {}.get(key, default)
 
         async def mock_astream():
             yield {"messages": [AIMessage("test response")]}
@@ -100,9 +97,8 @@ class TestAIHandler(unittest.IsolatedAsyncioTestCase):
     async def test_ai_handler_call_fallback(
         self, MockChatGoogleGenerativeAI, mock_create_react_agent, mock_getenv
     ):
-        
-        mock_getenv.side_effect = lambda key, default=None: {
-        }.get(key, default)
+
+        mock_getenv.side_effect = lambda key, default=None: {}.get(key, default)
 
         # Test AIHandler.call method with fallback
         mock_llm = MockChatGoogleGenerativeAI.return_value
@@ -130,16 +126,14 @@ class TestAIHandler(unittest.IsolatedAsyncioTestCase):
     async def test_ai_handler_call_unexpected_error(
         self, MockChatGoogleGenerativeAI, mock_create_react_agent, mock_getenv
     ):
-        mock_getenv.side_effect = lambda key, default=None: {
-        }.get(key, default)
+        mock_getenv.side_effect = lambda key, default=None: {}.get(key, default)
 
         mock_create_react_agent.return_value.astream.side_effect = Exception(
             "initial call failed"
         )
 
         ai_handler = AIHandler(
-            google_api_key="test_google_api_key",
-            google_llm_model="test_model"
+            google_api_key="test_google_api_key", google_llm_model="test_model"
         )
         ai_handler.current_agent = mock_create_react_agent.return_value
         ai_handler.fallback_llms = []  # No fallback LLMs to trigger unexpected error
@@ -150,8 +144,7 @@ class TestAIHandler(unittest.IsolatedAsyncioTestCase):
     @patch("pydiscogs.cogs.ai.Client")
     def test_web_research_tool(self, MockClient, mock_getenv):
 
-        mock_getenv.side_effect = lambda key, default=None: {
-        }.get(key, default)
+        mock_getenv.side_effect = lambda key, default=None: {}.get(key, default)
 
         # Test web_research tool
         ai_handler = AIHandler(
