@@ -5,6 +5,7 @@ on:
   push:
     branches-ignore:
       - main
+
 jobs:
   call-format-and-lint:
     uses: bpafoshizle/actions/.github/workflows/lint.yml@main
@@ -54,3 +55,5 @@ jobs:
   call-test-python:
     needs: setup-test-environment-file
     uses: bpafoshizle/actions/.github/workflows/test-python.yml@main
+    with:
+      python-version: "3.13"

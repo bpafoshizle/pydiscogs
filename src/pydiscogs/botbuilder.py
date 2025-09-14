@@ -1,7 +1,7 @@
 import logging
 import os
-from typing import Optional
 
+import discord
 from discord.ext import commands
 from pyaml_env import parse_config
 
@@ -17,24 +17,28 @@ logging.basicConfig(level=LOGLEVEL)
 
 
 def build_bot(yaml_config="./tests/testbot.yaml"):
+
+    intents = discord.Intents.default()
+    intents.message_content = (
+        True  # < This may give you `read-only` warning, just ignore it.
+    )
+    # This intent requires "Message Content Intent" to be enabled at https://discord.com/developers
+
     config = parse_config(yaml_config)
     command_prefix = config.get("commandPrefix")
     assert command_prefix, "commandPrefix is a required configuration value"
     guild_ids = config.get("guildIds")
     assert guild_ids, "guildIds is a required configuration value"
 
-    bot = commands.Bot(command_prefix=config["commandPrefix"], debug_guilds=guild_ids)
+    bot = commands.Bot(
+        command_prefix=config["commandPrefix"], debug_guilds=guild_ids, intents=intents
+    )
 
     discord_token = config["discordToken"]
     assert discord_token, "discordToken is a required configuration value"
 
     async def on_ready():
         logging.info("Logged in as %s", bot.user)
-
-    @commands.slash_command()
-    async def hello(ctx, name: Optional[str] = None):
-        name = name or ctx.author.name
-        await ctx.respond(f"Hello {name}!")
 
     bot.add_listener(on_ready)
     # bot.slash_command(guild_ids=guild_ids)(hello)

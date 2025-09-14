@@ -44,14 +44,14 @@ class TestTwitch(IsolatedAsyncioTestCase):
         events.append("setUp")
 
     async def asyncSetUp(self):
+        await self.twitch_cog.twitch_client.login()
         events.append("asyncSetUp")
 
     def tearDown(self):
         events.append("tearDown")
 
     async def asyncTearDown(self):
-        await self.twitch_cog.twitch_client._http.session.close()
-        # await self.twitch_cog.bot._websocket.close()
+        await self.twitch_cog.twitch_client.close()
         await asyncio.sleep(0.5)  # https://github.com/aio-libs/aiohttp/issues/1115
         events.append("asyncTearDown")
 
@@ -65,17 +65,19 @@ class TestTwitch(IsolatedAsyncioTestCase):
         events.append("test_get_stream_data_returns_proper_response")
         random_live_channel = (await self.twitch_cog.get_live_channels())[0]
         # ic(random_live_channel)
-        streams = await self.twitch_cog.get_stream_data([random_live_channel.name])
+        streams = await self.twitch_cog.get_stream_data(
+            [random_live_channel.broadcaster.id]
+        )
         # ic(streams)
         self.assertGreaterEqual(len(streams), 1)
         stream = streams[0]
         self.assertTrue(isinstance(stream.user, twitchio.user.PartialUser))
         self.assertTrue(isinstance(stream.user.name, str))
 
-        full_user = await stream.user.fetch()
+        full_user = await stream.user.user()
         self.assertTrue(isinstance(full_user, twitchio.user.User))
         self.assertTrue(isinstance(full_user.display_name, str))
-        self.assertTrue(isinstance(full_user.profile_image, str))
+        self.assertTrue(isinstance(full_user.profile_image, twitchio.Asset))
         self.assertTrue(isinstance(stream.title, str))
         self.assertTrue(isinstance(stream.game_name, str))
         self.assertTrue(isinstance(stream.started_at, datetime.datetime))

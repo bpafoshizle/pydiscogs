@@ -77,3 +77,7 @@ docker run \
   --rm \
   ghcr.io/super-linter/super-linter:latest
 ```
+
+## Sync requirements.txt from uv
+
+`uv pip compile pyproject.toml -o requirements.txt`

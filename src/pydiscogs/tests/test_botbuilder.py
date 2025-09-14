@@ -7,6 +7,7 @@ isort:skip_file
 import logging
 import unittest
 import warnings
+from unittest import IsolatedAsyncioTestCase
 
 from dotenv import load_dotenv
 from pydiscogs import botbuilder
@@ -15,12 +16,13 @@ from pydiscogs.cogs.wotd import WordOfTheDay
 from pydiscogs.cogs.stocks import StockQuote
 from pydiscogs.cogs.twitch import Twitch
 from pydiscogs.cogs.reddit import Reddit
+from pydiscogs.cogs.ai import AI
 
 logging.disable(logging.CRITICAL)
 load_dotenv(override=True)
 
 
-class TestBotBuilder(unittest.TestCase):
+class TestBotBuilder(IsolatedAsyncioTestCase):
     def setUp(self):
         warnings.simplefilter("ignore", category=DeprecationWarning)
         self.bot = botbuilder.build_bot("./src/pydiscogs/tests/testbot.yaml")
@@ -44,6 +46,10 @@ class TestBotBuilder(unittest.TestCase):
     def test_Reddit_cog_created(self):
         cog = self.bot.cogs.get("Reddit")
         self.assertTrue(isinstance(cog, Reddit))
+
+    def test_AI_cog_created(self):
+        cog = self.bot.cogs.get("AI")
+        self.assertTrue(isinstance(cog, AI))
 
 
 if __name__ == "__main__":

@@ -2,7 +2,6 @@ import contextlib
 import io
 import logging
 import os
-from typing import Dict, List
 
 import discord
 from discord.ext import commands
@@ -45,7 +44,7 @@ class AI(commands.Cog):
         self.bot = bot
 
     @commands.slash_command()
-    async def ai(self, ctx: discord.ApplicationContext, input: str):
+    async def ask_ai(self, ctx: discord.ApplicationContext, input: str):
         await ctx.defer()
         response = await self.ai_handler.call(input)
         await ctx.respond(response)
@@ -58,6 +57,38 @@ class AI(commands.Cog):
             message_content=message.content,
         )
         await ctx.send_modal(modal)
+
+    @commands.command()
+    async def ai(self, ctx, *, input: str):
+        replied_to_message_content = None
+        if ctx.message.reference:
+            replied_to_message_content = (
+                await ctx.fetch_message(ctx.message.reference.message_id)
+            ).content
+        response = await self.ai_handler.call(input, replied_to_message_content)
+        await ctx.send(response)
+
+    @commands.Cog.listener()
+    async def on_message(self, message: discord.Message):
+        # Ignore messages sent by the bot itself
+        if message.author.id == self.bot.user.id:
+            return
+
+        # Check if the bot was mentioned in the message
+        if self.bot.user in message.mentions:
+            # await message.reply("Thanks for mentioning me!")  # Reply to the message
+            replied_to_message_content = None
+            if message.reference:
+                replied_to_message_content = (
+                    await message.channel.fetch_message(message.reference.message_id)
+                ).content
+            response = await self.ai_handler.call(
+                message.content, replied_to_message_content
+            )
+            await message.reply(response)
+
+        # Allow other listeners and commands to process the message
+        # await self.bot.process_commands(message)
 
 
 class AIReplyModal(discord.ui.Modal):
@@ -80,26 +111,26 @@ class AIReplyModal(discord.ui.Modal):
 class AIHandler:
     def __init__(
         self,
-        ollama_endpoint: str = os.getenv("OLLAMA_ENDPOINT"),
-        ollama_llm_model: str = os.getenv("OLLAMA_LLM_MODEL"),
-        google_api_key: str = os.getenv("GOOGLE_API_KEY"),
-        google_llm_model: str = os.getenv("GOOGLE_LLM_MODEL"),
-        groq_api_key: str = os.getenv("GROQ_API_KEY"),
-        groq_llm_model: str = os.getenv("GROQ_LLM_MODEL"),
-        ai_system_prompt: str = os.getenv("AI_SYSTEM_PROMPT"),
+        ollama_endpoint: str = None,
+        ollama_llm_model: str = None,
+        google_api_key: str = None,
+        google_llm_model: str = None,
+        groq_api_key: str = None,
+        groq_llm_model: str = None,
+        ai_system_prompt: str = None,
     ):
-        if not any([ollama_endpoint, groq_api_key, google_api_key]):
+        self.ollama_endpoint = ollama_endpoint or os.getenv("OLLAMA_ENDPOINT")
+        self.ollama_llm_model = ollama_llm_model or os.getenv("OLLAMA_LLM_MODEL")
+        self.google_api_key = google_api_key or os.getenv("GOOGLE_API_KEY")
+        self.google_llm_model = google_llm_model or os.getenv("GOOGLE_LLM_MODEL")
+        self.groq_api_key = groq_api_key or os.getenv("GROQ_API_KEY")
+        self.groq_llm_model = groq_llm_model or os.getenv("GROQ_LLM_MODEL")
+        self.ai_system_prompt = ai_system_prompt or os.getenv("AI_SYSTEM_PROMPT")
+
+        if not any([self.ollama_endpoint, self.groq_api_key, self.google_api_key]):
             raise ValueError(
                 "Must specify either ollama_endpoint, groq_api_key, or google_api_key"
             )
-
-        self.ollama_endpoint = ollama_endpoint
-        self.ollama_llm_model = ollama_llm_model
-        self.groq_llm_model = groq_llm_model
-        self.google_llm_model = google_llm_model
-        self.google_api_key = google_api_key
-
-        self.ai_system_prompt = ai_system_prompt
 
         self.tools = self.__get_tools()
 
@@ -142,21 +173,34 @@ class AIHandler:
             except Exception as e:
                 logger.error(f"Unexpected error caught. Error message: {str(e)}")
                 return "AI Error"
+        except Exception as e:
+            logger.error(f"Unexpected error caught. Error message: {str(e)}")
+            return "AI Error"
 
     def __setupLLMs(self):
         if self.ollama_endpoint:
             self.ollama_llm = self.__setupOllamaLLM(
                 self.ollama_endpoint, self.ollama_llm_model
             )
+        else:
+            self.ollama_llm = None
 
         if self.groq_llm_model:
             self.groq_llm = self.__setupGroqLLM(self.groq_llm_model)
+        else:
+            self.groq_llm = None
 
         if self.google_llm_model:
             self.google_llm = self.__setupGoogleLLM(self.google_llm_model)
+        else:
+            self.google_llm = None
 
-        self.current_llm = self.google_llm
-        self.fallback_llms = [self.ollama_llm, self.groq_llm]
+        llms = [self.google_llm, self.ollama_llm, self.groq_llm]
+        self.current_llm = next((llm for llm in llms if llm), None)
+        self.fallback_llms = [
+            llm for llm in llms if llm != self.current_llm and llm is not None
+        ]
+
         self.current_agent = create_react_agent(
             self.current_llm, self.tools, prompt=self.ai_system_prompt
         )
@@ -193,25 +237,6 @@ class AIHandler:
         )
 
     def __get_tools(self):
-        from duckduckgo_search import DDGS
-
-        # from langchain_community.tools import BraveSearch
-        from langchain_community.agent_toolkits import PlayWrightBrowserToolkit
-        from langchain_community.tools.playwright.utils import (
-            create_async_playwright_browser,
-        )
-
-        @tool
-        def web_search_image_ddg(query: str) -> List[Dict]:
-            """Search the web for images using DuckDuckGo."""
-            return DDGS().images(query, max_results=10)
-
-        @tool
-        def web_search_text_ddg(query: str) -> List[Dict]:
-            """Search the web for text content using DuckDuckGo."""
-            results = DDGS().text(query, max_results=10)
-            logger.info(results)
-            return results
 
         @tool
         def web_research(query: str):
@@ -262,14 +287,8 @@ class AIHandler:
 
             return data["web_research_result"]
 
-        # brave_search = BraveSearch.from_api_key(os.getenv("BRAVE_SEARCH_API_KEY"))
-
-        playwright_tools = PlayWrightBrowserToolkit.from_browser(
-            async_browser=create_async_playwright_browser()
-        ).get_tools()
-
         # return [web_search_text_ddg, web_search_image_ddg]
-        return [web_research, *playwright_tools]
+        return [web_research]
 
     def __get_pretty_print_response_string(self, response):
         pretty_output = ""
