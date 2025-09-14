@@ -111,26 +111,26 @@ class AIReplyModal(discord.ui.Modal):
 class AIHandler:
     def __init__(
         self,
-        ollama_endpoint: str = os.getenv("OLLAMA_ENDPOINT"),
-        ollama_llm_model: str = os.getenv("OLLAMA_LLM_MODEL"),
-        google_api_key: str = os.getenv("GOOGLE_API_KEY"),
-        google_llm_model: str = os.getenv("GOOGLE_LLM_MODEL"),
-        groq_api_key: str = os.getenv("GROQ_API_KEY"),
-        groq_llm_model: str = os.getenv("GROQ_LLM_MODEL"),
-        ai_system_prompt: str = os.getenv("AI_SYSTEM_PROMPT"),
+        ollama_endpoint: str = None,
+        ollama_llm_model: str = None,
+        google_api_key: str = None,
+        google_llm_model: str = None,
+        groq_api_key: str = None,
+        groq_llm_model: str = None,
+        ai_system_prompt: str = None,
     ):
-        if not any([ollama_endpoint, groq_api_key, google_api_key]):
+        self.ollama_endpoint = ollama_endpoint or os.getenv("OLLAMA_ENDPOINT")
+        self.ollama_llm_model = ollama_llm_model or os.getenv("OLLAMA_LLM_MODEL")
+        self.google_api_key = google_api_key or os.getenv("GOOGLE_API_KEY")
+        self.google_llm_model = google_llm_model or os.getenv("GOOGLE_LLM_MODEL")
+        self.groq_api_key = groq_api_key or os.getenv("GROQ_API_KEY")
+        self.groq_llm_model = groq_llm_model or os.getenv("GROQ_LLM_MODEL")
+        self.ai_system_prompt = ai_system_prompt or os.getenv("AI_SYSTEM_PROMPT")
+
+        if not any([self.ollama_endpoint, self.groq_api_key, self.google_api_key]):
             raise ValueError(
                 "Must specify either ollama_endpoint, groq_api_key, or google_api_key"
             )
-
-        self.ollama_endpoint = ollama_endpoint
-        self.ollama_llm_model = ollama_llm_model
-        self.groq_llm_model = groq_llm_model
-        self.google_llm_model = google_llm_model
-        self.google_api_key = google_api_key
-
-        self.ai_system_prompt = ai_system_prompt
 
         self.tools = self.__get_tools()
 
