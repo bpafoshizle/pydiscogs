@@ -28,7 +28,7 @@ class TestAIHandler(unittest.IsolatedAsyncioTestCase):
 
         mock_getenv.side_effect = lambda key, default=None: {
             "GROQ_LLM_MODEL": None,
-            "OLLAMA_LLM_MODEL": None,
+            "OLLAMA_ENDPOINT": None,
         }.get(key, default)
 
         # Test AIHandler initialization with Google LLM
@@ -60,7 +60,7 @@ class TestAIHandler(unittest.IsolatedAsyncioTestCase):
 
         mock_getenv.side_effect = lambda key, default=None: {
             "GOOGLE_LLM_MODEL": None,
-            "OLLAMA_LLM_MODEL": None,
+            "OLLAMA_ENDPOINT": None,
         }.get(key, default)
 
         # Test AIHandler initialization with Groq LLM
@@ -75,7 +75,7 @@ class TestAIHandler(unittest.IsolatedAsyncioTestCase):
 
         mock_getenv.side_effect = lambda key, default=None: {
             "GROQ_LLM_MODEL": None,
-            "OLLAMA_LLM_MODEL": None,
+            "OLLAMA_ENDPOINT": None,
             "GOOGLE_LLM_MODEL": None,
         }.get(key, default)
 
@@ -91,7 +91,7 @@ class TestAIHandler(unittest.IsolatedAsyncioTestCase):
     ):
         mock_getenv.side_effect = lambda key, default=None: {
             "GROQ_LLM_MODEL": None,
-            "OLLAMA_LLM_MODEL": None,
+            "OLLAMA_ENDPOINT": None,
         }.get(key, default)
 
         async def mock_astream():
@@ -116,7 +116,7 @@ class TestAIHandler(unittest.IsolatedAsyncioTestCase):
 
         mock_getenv.side_effect = lambda key, default=None: {
             "GROQ_LLM_MODEL": None,
-            "OLLAMA_LLM_MODEL": None,
+            "OLLAMA_ENDPOINT": None,
         }.get(key, default)
 
         # Test AIHandler.call method with fallback
@@ -147,7 +147,7 @@ class TestAIHandler(unittest.IsolatedAsyncioTestCase):
     ):
         mock_getenv.side_effect = lambda key, default=None: {
             "GROQ_LLM_MODEL": None,
-            "OLLAMA_LLM_MODEL": None,
+            "OLLAMA_ENDPOINT": None,
         }.get(key, default)
 
         mock_create_react_agent.return_value.astream.side_effect = Exception(
@@ -168,7 +168,7 @@ class TestAIHandler(unittest.IsolatedAsyncioTestCase):
 
         mock_getenv.side_effect = lambda key, default=None: {
             "GROQ_LLM_MODEL": None,
-            "OLLAMA_LLM_MODEL": None,
+            "OLLAMA_ENDPOINT": None,
         }.get(key, default)
 
         # Test web_research tool
