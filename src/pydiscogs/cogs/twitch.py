@@ -24,6 +24,7 @@ class Twitch(commands.Cog):
         discord_post_channel_id: int,
         join_channels_list=[],
         follow_channels_list=[],
+        run_startup_tasks: bool = True,
     ):
         self.follow_channels_list = follow_channels_list
         self.join_channels_list = join_channels_list
@@ -34,23 +35,27 @@ class Twitch(commands.Cog):
         self.user_data = None
         self.discord_post_channel_id = discord_post_channel_id
         self.twitch_client = twitchio.Client(
-            client_id=twitch_bot_client_id, client_secret=twitch_bot_client_secret, bot_id=twitch_bot_user_id
+            client_id=twitch_bot_client_id,
+            client_secret=twitch_bot_client_secret,
+            bot_id=twitch_bot_user_id,
         )
 
-        bot.loop.create_task(self.start_twitch_client())
-
-        # pylint: disable=no-member
-        self.check_channels_live_task.start()
+        if run_startup_tasks:
+            bot.loop.create_task(self.start_twitch_client())
+            # pylint: disable=no-member
+            self.check_channels_live_task.start()
 
     async def start_twitch_client(self):
         try:
-            await asyncio.wait_for(self.twitch_client.login(), timeout=10)  # Set a 10-second timeout
-            print("Twitch client started successfully.")
+            await asyncio.wait_for(
+                self.twitch_client.login(), timeout=10
+            )  # Set a 10-second timeout
+            logger.info("Twitch client started successfully.")
         except asyncio.TimeoutError:
-            print("Twitch client failed to start within the timeout period.")
+            logger.error("Twitch client failed to start within the timeout period.")
         except Exception as e:
-            print(f"An error occurred while starting the Twitch client: {e}")
-    
+            logger.error(f"An error occurred while starting the Twitch client: {e}")
+
     # Discord tasks and commandsnaive_to_us_central
     @tasks.loop(minutes=1)
     async def check_channels_live_task(self):
@@ -179,4 +184,5 @@ class Twitch(commands.Cog):
         return await self.twitch_client.search_channels(query, live=True)
 
     async def get_stream_data(self, channels):
+        logger.info("Getting stream data from %s", channels)
         return await self.twitch_client.fetch_streams(user_ids=channels)

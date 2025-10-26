@@ -1,5 +1,5 @@
-"""test_twitch.py
- testing twitch of the day
+# test_twitch.py
+"""testing twitch of the day
 
 isort:skip_file
 """
@@ -37,14 +37,17 @@ class TestTwitch(IsolatedAsyncioTestCase):
             self.bot,
             os.getenv("TWITCH_BOT_CLIENT_ID"),
             os.getenv("TWITCH_BOT_CLIENT_SECRET"),
+            os.getenv("TWITCH_BOT_USER_ID"),
             os.getenv("DSCRD_CHNL_GAMING"),
             join_channels_list,
             follow_channels_list,
+            run_startup_tasks=False,
         )
         events.append("setUp")
 
     async def asyncSetUp(self):
-        await self.twitch_cog.twitch_client.login()
+        print("Attempting to login to Twitch...")
+        await self.twitch_cog.start_twitch_client()
         events.append("asyncSetUp")
 
     def tearDown(self):
