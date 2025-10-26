@@ -25,7 +25,7 @@ join_channels_list = ["bpafoshizle", "ephenry84", "elzblazin", "kuhouseii", "fwm
 
 follow_channels_list = [
     "JackFrags",
-    "TrueGameDataLive",
+    "icemanisaac",
     "Stodeh",
 ]
 
