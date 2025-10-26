@@ -24,6 +24,7 @@ cogs:
     properties:
       twitchClientID: !ENV ${TWITCH_BOT_CLIENT_ID}
       twitchClientSecret: !ENV ${TWITCH_BOT_CLIENT_SECRET}
+      twitchBotUserID: !ENV ${TWITCH_BOT_USER_ID}
       joinChannelList:
         - bpafoshizle
         - ephenry84
