@@ -98,6 +98,9 @@ def add_twitch_cog(bot, cog_properties):
     twitch_client_secret = check_and_get_property(
         cog_properties, "twitch", "twitchClientSecret"
     )
+    twitch_bot_user_id = check_and_get_property(
+        cog_properties, "twitch", "twitchBotUserID"
+    )
     join_channel_list = check_and_get_property(
         cog_properties, "twitch", "joinChannelList"
     )
@@ -106,6 +109,7 @@ def add_twitch_cog(bot, cog_properties):
             bot,
             twitch_client_id,
             twitch_client_secret,
+            twitch_bot_user_id,
             post_channel_id,
             join_channel_list,
         )

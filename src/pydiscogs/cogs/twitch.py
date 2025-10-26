@@ -1,3 +1,4 @@
+import asyncio
 import logging
 from datetime import datetime, timezone
 from pprint import pprint
@@ -19,6 +20,7 @@ class Twitch(commands.Cog):
         bot,
         twitch_bot_client_id,
         twitch_bot_client_secret,
+        twitch_bot_user_id,
         discord_post_channel_id: int,
         join_channels_list=[],
         follow_channels_list=[],
@@ -32,23 +34,23 @@ class Twitch(commands.Cog):
         self.user_data = None
         self.discord_post_channel_id = discord_post_channel_id
         self.twitch_client = twitchio.Client(
-            client_id=twitch_bot_client_id, client_secret=twitch_bot_client_secret
+            client_id=twitch_bot_client_id, client_secret=twitch_bot_client_secret, bot_id=twitch_bot_user_id
         )
+
+        bot.loop.create_task(self.start_twitch_client())
 
         # pylint: disable=no-member
         self.check_channels_live_task.start()
 
-        # Can't use event sub without internet accessible https callback endpoint
-        # self.twitch_eventsub_client = eventsub.EventSubClient(
-        #     client=self.twitch_client,
-        #     webhook_secret=os.getenv("TWITCH_WEBHOOK_SECRET"),
-        #     callback_route="https://bpafoshizle.com/webhooks/callback"
-        # )
-
-        # self.twitch_eventsub_client.subscribe_channel_stream_start(108647345)
-
-        # bot.slash_command(guild_ids=guild_ids)(self.twitch_getuser)
-
+    async def start_twitch_client(self):
+        try:
+            await asyncio.wait_for(self.twitch_client.login(), timeout=10)  # Set a 10-second timeout
+            print("Twitch client started successfully.")
+        except asyncio.TimeoutError:
+            print("Twitch client failed to start within the timeout period.")
+        except Exception as e:
+            print(f"An error occurred while starting the Twitch client: {e}")
+    
     # Discord tasks and commandsnaive_to_us_central
     @tasks.loop(minutes=1)
     async def check_channels_live_task(self):
