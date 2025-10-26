@@ -26,9 +26,6 @@ dependencies = [
     "yfinance==0.2.63",
     "uvloop"
 ]
-commands = [
-    "uv pip sync"
-]
 
 [build-system]
 requires = ["setuptools>=42", "wheel"]
