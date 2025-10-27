@@ -15,7 +15,6 @@ dependencies = [
     "langchain-ollama==0.2.2",
     "langgraph==0.3.21",
     "ollama==0.5.1",
-    "playwright==1.51.0",
     "polygon-api-client==1.14.6",
     "py-cord==2.6.1",
     "pyaml-env==1.2.1",

@@ -40,8 +40,6 @@ jobs:
           export GOOGLE_API_KEY=\"${{ secrets.GOOGLE_API_KEY }}\"
           export GOOGLE_LLM_MODEL=\"${{ secrets.GOOGLE_LLM_MODEL }}\"
           export BRAVE_SEARCH_API_KEY=\"${{ secrets.BRAVE_SEARCH_API_KEY }}\"
-
-          playwright install
           
           "
           # Write the commands to a file
