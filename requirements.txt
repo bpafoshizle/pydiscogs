@@ -93,8 +93,6 @@ googleapis-common-protos==1.70.0
     # via
     #   google-api-core
     #   grpcio-status
-greenlet==3.2.4
-    # via playwright
 groq==0.31.1
     # via langchain-groq
 grpcio==1.74.0
@@ -210,8 +208,6 @@ peewee==3.18.2
     # via yfinance
 platformdirs==4.4.0
     # via yfinance
-playwright==1.51.0
-    # via pydiscogs (pyproject.toml)
 polygon-api-client==1.14.6
     # via pydiscogs (pyproject.toml)
 primp==0.15.0
@@ -260,8 +256,6 @@ pydantic-core==2.33.2
     # via pydantic
 pydantic-settings==2.10.1
     # via langchain-community
-pyee==12.1.1
-    # via playwright
 pyparsing==3.2.3
     # via httplib2
 python-dateutil==2.9.0.post0
@@ -331,7 +325,6 @@ typing-extensions==4.15.0
     #   langchain-core
     #   pydantic
     #   pydantic-core
-    #   pyee
     #   sqlalchemy
     #   typing-inspect
     #   typing-inspection
@@ -351,6 +344,8 @@ urllib3==2.5.0
     # via
     #   polygon-api-client
     #   requests
+uvloop==0.22.1
+    # via pydiscogs (pyproject.toml)
 websockets==14.2
     # via
     #   google-genai
