@@ -16,7 +16,7 @@ from pydiscogs.cogs.wotd import WordOfTheDay
 from pydiscogs.cogs.stocks import StockQuote
 from pydiscogs.cogs.twitch import Twitch
 from pydiscogs.cogs.reddit import Reddit
-from pydiscogs.cogs.ai import AI
+from pydiscogs.cogs.ai.cog import AI
 
 logging.disable(logging.CRITICAL)
 load_dotenv(override=True)
