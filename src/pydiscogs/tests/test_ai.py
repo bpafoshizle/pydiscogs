@@ -10,7 +10,7 @@ import unittest
 from unittest.mock import MagicMock, patch, AsyncMock
 
 from dotenv import load_dotenv
-from pydiscogs.cogs.ai import AI, AIHandler, AIReplyModal
+from pydiscogs.cogs.ai.cog import AI, AIHandler, AIReplyModal
 from discord.ext import commands
 from httpx import ConnectError
 from langchain_core.messages import AIMessage
