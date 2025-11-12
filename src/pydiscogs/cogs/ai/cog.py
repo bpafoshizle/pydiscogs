@@ -42,7 +42,8 @@ class AI(commands.Cog):
         )
         self.bot = bot
 
-    async def send_response(self, destination, response: str):
+    @staticmethod
+    async def send_response(destination, response: str):
         wrapper = textwrap.TextWrapper(
             width=2000,
             break_long_words=True,
@@ -285,16 +286,21 @@ class AIHandler:
         )
 
     def __get_tools(self):
-        return [
-            WebResearchTool(
-                google_api_key=self.google_api_key,
-                google_llm_model=self.google_llm_model,
-            ),
-            UrlContextTool(
-                google_api_key=self.google_api_key,
-                google_llm_model=self.google_llm_model,
-            ),
-        ]
+        tools = []
+        if self.google_api_key and self.google_llm_model:
+            tools.extend(
+                [
+                    WebResearchTool(
+                        google_api_key=self.google_api_key,
+                        google_llm_model=self.google_llm_model,
+                    ),
+                    UrlContextTool(
+                        google_api_key=self.google_api_key,
+                        google_llm_model=self.google_llm_model,
+                    ),
+                ]
+            )
+        return tools
 
     def __get_pretty_print_response_string(self, response):
         pretty_output = ""
