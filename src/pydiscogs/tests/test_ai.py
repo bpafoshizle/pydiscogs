@@ -9,8 +9,9 @@ import os
 import unittest
 from unittest.mock import MagicMock, patch, AsyncMock
 
+import discord
 from dotenv import load_dotenv
-from pydiscogs.cogs.ai import AI, AIHandler, AIReplyModal
+from pydiscogs.cogs.ai.cog import AI, AIHandler, AIReplyModal
 from discord.ext import commands
 from httpx import ConnectError
 from langchain_core.messages import AIMessage
@@ -21,7 +22,7 @@ events = []
 
 class TestAIHandler(unittest.IsolatedAsyncioTestCase):
     @patch("os.getenv")
-    @patch("pydiscogs.cogs.ai.ChatGoogleGenerativeAI")
+    @patch("pydiscogs.cogs.ai.cog.ChatGoogleGenerativeAI")
     def test_ai_handler_initialization_google(
         self, MockChatGoogleGenerativeAI, mock_getenv
     ):
@@ -40,7 +41,7 @@ class TestAIHandler(unittest.IsolatedAsyncioTestCase):
         )
 
     @patch("os.getenv")
-    @patch("pydiscogs.cogs.ai.ChatOllama")
+    @patch("pydiscogs.cogs.ai.cog.ChatOllama")
     def test_ai_handler_initialization_ollama(self, MockChatOllama, mock_getenv):
 
         mock_getenv.side_effect = lambda key, default=None: {
@@ -55,7 +56,7 @@ class TestAIHandler(unittest.IsolatedAsyncioTestCase):
         self.assertIsInstance(ai_handler.current_llm, type(MockChatOllama.return_value))
 
     @patch("os.getenv")
-    @patch("pydiscogs.cogs.ai.ChatGroq")
+    @patch("pydiscogs.cogs.ai.cog.ChatGroq")
     def test_ai_handler_initialization_groq(self, MockChatGroq, mock_getenv):
 
         mock_getenv.side_effect = lambda key, default=None: {
@@ -84,11 +85,8 @@ class TestAIHandler(unittest.IsolatedAsyncioTestCase):
             AIHandler()
 
     @patch("os.getenv")
-    @patch("pydiscogs.cogs.ai.create_react_agent")
-    @patch("pydiscogs.cogs.ai.ChatGoogleGenerativeAI")
-    async def test_ai_handler_call(
-        self, MockChatGoogleGenerativeAI, mock_create_react_agent, mock_getenv
-    ):
+    @patch("pydiscogs.cogs.ai.cog.create_agent")
+    async def test_ai_handler_call(self, mock_create_agent, mock_getenv):
         mock_getenv.side_effect = lambda key, default=None: {
             "GROQ_LLM_MODEL": None,
             "OLLAMA_ENDPOINT": None,
@@ -97,21 +95,21 @@ class TestAIHandler(unittest.IsolatedAsyncioTestCase):
         async def mock_astream():
             yield {"messages": [AIMessage("test response")]}
 
-        mock_create_react_agent.return_value.astream.return_value = mock_astream()
+        mock_create_agent.return_value.astream.return_value = mock_astream()
 
         ai_handler = AIHandler(
             google_api_key="test_google_api_key",
             google_llm_model="test_model",
         )
-        ai_handler.current_agent = mock_create_react_agent.return_value
+        ai_handler.current_agent = mock_create_agent.return_value
         response = await ai_handler.call("test input")
         self.assertEqual(response, "test response")
 
     @patch("os.getenv")
-    @patch("pydiscogs.cogs.ai.create_react_agent")
-    @patch("pydiscogs.cogs.ai.ChatGoogleGenerativeAI")
+    @patch("pydiscogs.cogs.ai.cog.create_agent")
+    @patch("pydiscogs.cogs.ai.cog.ChatGoogleGenerativeAI")
     async def test_ai_handler_call_fallback(
-        self, MockChatGoogleGenerativeAI, mock_create_react_agent, mock_getenv
+        self, MockChatGoogleGenerativeAI, mock_create_agent, mock_getenv
     ):
 
         mock_getenv.side_effect = lambda key, default=None: {
@@ -125,7 +123,7 @@ class TestAIHandler(unittest.IsolatedAsyncioTestCase):
         async def mock_astream():
             yield {"messages": [AIMessage("test response")]}
 
-        mock_create_react_agent.return_value.astream.side_effect = [
+        mock_create_agent.return_value.astream.side_effect = [
             ConnectError("initial call failed"),
             mock_astream(),
         ]
@@ -134,36 +132,36 @@ class TestAIHandler(unittest.IsolatedAsyncioTestCase):
             google_api_key="test_google_api_key",
             google_llm_model="test_model",
         )
-        ai_handler.current_agent = mock_create_react_agent.return_value
+        ai_handler.current_agent = mock_create_agent.return_value
         ai_handler.fallback_llms = [mock_llm]  # Set up a fallback LLM
         response = await ai_handler.call("test input")
         self.assertEqual(response, "test response")
 
     @patch("os.getenv")
-    @patch("pydiscogs.cogs.ai.create_react_agent")
-    @patch("pydiscogs.cogs.ai.ChatGoogleGenerativeAI")
+    @patch("pydiscogs.cogs.ai.cog.create_agent")
+    @patch("pydiscogs.cogs.ai.cog.ChatGoogleGenerativeAI")
     async def test_ai_handler_call_unexpected_error(
-        self, MockChatGoogleGenerativeAI, mock_create_react_agent, mock_getenv
+        self, MockChatGoogleGenerativeAI, mock_create_agent, mock_getenv
     ):
         mock_getenv.side_effect = lambda key, default=None: {
             "GROQ_LLM_MODEL": None,
             "OLLAMA_ENDPOINT": None,
         }.get(key, default)
 
-        mock_create_react_agent.return_value.astream.side_effect = Exception(
+        mock_create_agent.return_value.astream.side_effect = Exception(
             "initial call failed"
         )
 
         ai_handler = AIHandler(
             google_api_key="test_google_api_key", google_llm_model="test_model"
         )
-        ai_handler.current_agent = mock_create_react_agent.return_value
+        ai_handler.current_agent = mock_create_agent.return_value
         ai_handler.fallback_llms = []  # No fallback LLMs to trigger unexpected error
         response = await ai_handler.call("test input")
         self.assertEqual(response, "AI Error")
 
     @patch("os.getenv")
-    @patch("pydiscogs.cogs.ai.Client")
+    @patch("pydiscogs.cogs.ai.tools.web_research.Client")
     def test_web_research_tool(self, MockClient, mock_getenv):
 
         mock_getenv.side_effect = lambda key, default=None: {
@@ -184,9 +182,9 @@ class TestAIHandler(unittest.IsolatedAsyncioTestCase):
 
         tools = ai_handler._AIHandler__get_tools()
         web_research = tools[0]
-        result = web_research.func("test query")
+        result = web_research.run("test query")
 
-        self.assertEqual(result, ["test response"])
+        self.assertEqual(result, "test response")
 
 
 class TestAI(unittest.IsolatedAsyncioTestCase):
@@ -217,13 +215,14 @@ class TestAI(unittest.IsolatedAsyncioTestCase):
     async def on_cleanup(self):
         events.append("cleanup")
 
-    @patch("pydiscogs.cogs.ai.AIHandler")
-    async def test_ask_ai(self, MockAIHandler):
+    @patch("pydiscogs.cogs.ai.cog.AI.send_response", new_callable=AsyncMock)
+    @patch("pydiscogs.cogs.ai.cog.AIHandler")
+    async def test_ask_ai(self, MockAIHandler, mock_send_response):
         # Test ask_ai command
-        mock_context = MagicMock()
-        mock_context.respond = MagicMock()
+        mock_context = MagicMock(spec=discord.ApplicationContext)
         mock_context.defer = AsyncMock()
-        mock_context.respond = AsyncMock()
+        mock_context.followup = MagicMock(spec=discord.Webhook)
+        mock_context.followup.send = AsyncMock()
         mock_ai_handler = MockAIHandler.return_value
 
         async def async_return(ret_val):
@@ -235,13 +234,13 @@ class TestAI(unittest.IsolatedAsyncioTestCase):
         await self.ai_cog.ask_ai(self.ai_cog, mock_context, "test input")
 
         mock_context.defer.assert_called()
-        mock_context.respond.assert_called_with("test response")
+        mock_send_response.assert_called_with(mock_context.followup, "test response")
 
-    @patch("pydiscogs.cogs.ai.AIReplyModal")
-    @patch("pydiscogs.cogs.ai.AIHandler")
+    @patch("pydiscogs.cogs.ai.cog.AIReplyModal")
+    @patch("pydiscogs.cogs.ai.cog.AIHandler")
     async def test_ai_reply(self, MockAIReplyModal, MockAIHandler):
         # Test ai_reply command
-        mock_context = MagicMock()
+        mock_context = MagicMock(spec=discord.Message)
         mock_context.send_modal = AsyncMock()
         mock_message = MagicMock()
         mock_message.content = "test message"
@@ -251,10 +250,11 @@ class TestAI(unittest.IsolatedAsyncioTestCase):
 
         mock_context.send_modal.assert_called()
 
-    @patch("pydiscogs.cogs.ai.AIHandler")
-    async def test_ai_command(self, MockAIHandler):
+    @patch("pydiscogs.cogs.ai.cog.AI.send_response", new_callable=AsyncMock)
+    @patch("pydiscogs.cogs.ai.cog.AIHandler")
+    async def test_ai_command(self, MockAIHandler, mock_send_response):
         # Test ai command
-        mock_context = MagicMock()
+        mock_context = MagicMock(spec=commands.Context)
         mock_context.send = AsyncMock()
         mock_context.message = MagicMock()
         mock_context.message.reference = None
@@ -269,18 +269,20 @@ class TestAI(unittest.IsolatedAsyncioTestCase):
         ai_cog.ai_handler = mock_ai_handler
         await ai_cog.ai(ai_cog, mock_context, input="test input")
 
-        mock_context.send.assert_called_with("test response")
+        mock_send_response.assert_called_with(mock_context, "test response")
 
-    @patch("pydiscogs.cogs.ai.AIHandler")
-    async def test_on_message(self, MockAIHandler):
+    @patch("pydiscogs.cogs.ai.cog.AI.send_response", new_callable=AsyncMock)
+    @patch("pydiscogs.cogs.ai.cog.AIHandler")
+    async def test_on_message(self, MockAIHandler, mock_send_response):
         # Test on_message event
-        mock_message = MagicMock()
+        mock_message = MagicMock(spec=discord.Message)
         mock_message.author.id = 123
         mock_bot = MagicMock()
         mock_bot.user.id = 456
         mock_message.mentions = [mock_bot.user]
         mock_message.content = "test message"
         mock_message.reply = AsyncMock()
+        mock_message.channel.send = AsyncMock()
         mock_message.channel.fetch_message = AsyncMock()
         mock_ai_handler = MockAIHandler.return_value
 
@@ -293,19 +295,20 @@ class TestAI(unittest.IsolatedAsyncioTestCase):
         ai_cog.ai_handler = mock_ai_handler
         await ai_cog.on_message(mock_message)
 
-        mock_message.reply.assert_called_with("test response")
+        mock_send_response.assert_called_with(mock_message, "test response")
 
 
 class TestAIReplyModal(unittest.IsolatedAsyncioTestCase):
+    @patch("pydiscogs.cogs.ai.cog.AIReplyModal.add_item")
     @patch("discord.ui.Modal.__init__")
-    @patch("pydiscogs.cogs.ai.AIReplyModal.add_item")
     async def test_callback(self, mock_modal_init, mock_add_item):
         # Test callback method of AIReplyModal
         mock_modal_init.return_value = None
         mock_add_item.return_value = None  # Mock the add_item method
         mock_interaction = MagicMock()
         mock_interaction.response.defer = AsyncMock()
-        mock_interaction.followup.send = AsyncMock()
+        mock_interaction.followup = MagicMock()
+        mock_send_response = AsyncMock()
         mock_ai_handler = AsyncMock()
         mock_ai_handler.call.return_value = "test response"
 
@@ -318,18 +321,22 @@ class TestAIReplyModal(unittest.IsolatedAsyncioTestCase):
 
         # Mock the AIReplyModal's children property to return the mock_children list
         with patch(
-            "pydiscogs.cogs.ai.AIReplyModal.children",
+            "pydiscogs.cogs.ai.cog.AIReplyModal.children",
             new_callable=unittest.mock.PropertyMock,
         ) as mock_children_property:
             mock_children_property.return_value = mock_children
 
             modal = AIReplyModal(
-                ai_handler=mock_ai_handler, message_content="test message"
+                ai_handler=mock_ai_handler,
+                message_content="test message",
+                send_response_fn=mock_send_response,
             )
             await modal.callback(mock_interaction)
 
         mock_interaction.response.defer.assert_called()
-        mock_interaction.followup.send.assert_called_with("test response")
+        mock_send_response.assert_called_with(
+            mock_interaction.followup, "test response"
+        )
 
 
 if __name__ == "__main__":

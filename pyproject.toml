@@ -1,6 +1,6 @@
 [project]
 name = "pydiscogs"
-version = "0.2.0"
+version = "0.4.0"
 description = "A collection of cogs that can be used to add functionality to a Discord.py bot"
 readme = "README.md"
 requires-python = ">=3.13"
@@ -9,20 +9,26 @@ dependencies = [
     "audioop-lts>=0.2.1",
     "duckduckgo-search==7.5.5",
     "google-genai==1.20.0",
-    "langchain-community==0.3.20",
-    "langchain-google-genai==2.0.10",
-    "langchain-groq==0.2.3",
-    "langchain-ollama==0.2.2",
-    "langgraph==0.3.21",
-    "ollama==0.5.1",
+    "langchain==1.0.3",
+    "langchain-core==1.0.2",
+    "langchain-google-genai==3.0.0",
+    "langchain-groq==1.0.0",
+    "langchain-ollama==1.0.0",
+    "langgraph==1.0.2",
+    "langgraph-checkpoint==3.0.0",
+    "langgraph-prebuilt==1.0.2",
+    "langgraph-sdk==0.2.9",
+    "langsmith==0.4.39",
+    "ollama==0.6.0",
     "polygon-api-client==1.14.6",
     "py-cord==2.6.1",
     "pyaml-env==1.2.1",
-    "python-dotenv==1.0.1",
+    "python-dotenv==1.2.1",
     "pytz>=2021.1",
     "tweepy[async]==4.12.1",
     "twitchio==3.1.0",
     "yfinance==0.2.63",
+    "zstandard==0.25.0",
     "uvloop"
 ]
 
@@ -59,4 +65,5 @@ dev = [
     "flake8>=7.3.0",
     "isort>=6.0.1",
 ]
+
 

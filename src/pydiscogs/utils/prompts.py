@@ -16,5 +16,16 @@ Instructions:
 - Only include the information found in the search results, don't make up any information.
 
 Research Topic:
+{research_topic}"""
+
+url_context_instructions = """Synthesize the information from the provided URLs into a verifiable text artifact.
+
+Instructions:
+- The current date is {current_date}.
+- Consolidate key findings from the provided URLs.
+- The output should be a well-written summary or report.
+- Only include the information found in the provided URLs, don't make up any information.
+
+Research Topic:
 {research_topic}
 """

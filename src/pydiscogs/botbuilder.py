@@ -5,7 +5,7 @@ import discord
 from discord.ext import commands
 from pyaml_env import parse_config
 
-from pydiscogs.cogs.ai import AI
+from pydiscogs.cogs.ai.cog import AI
 from pydiscogs.cogs.inspire import InspireQuote
 from pydiscogs.cogs.reddit import Reddit
 from pydiscogs.cogs.stocks import StockQuote

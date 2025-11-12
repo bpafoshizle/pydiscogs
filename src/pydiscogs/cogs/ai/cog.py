@@ -2,20 +2,19 @@ import contextlib
 import io
 import logging
 import os
+import textwrap
 
 import discord
 from discord.ext import commands
-from google.genai import Client
 from httpx import ConnectError
+from langchain.agents import create_agent
 from langchain_core.messages import HumanMessage
-from langchain_core.tools import tool
 from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_groq import ChatGroq
 from langchain_ollama import ChatOllama
-from langgraph.prebuilt import create_react_agent
 
-from pydiscogs.utils.gemini import get_citations, insert_citation_markers, resolve_urls
-from pydiscogs.utils.prompts import get_current_date, web_searcher_instructions
+from .tools.url_context import UrlContextTool
+from .tools.web_research import WebResearchTool
 
 logger = logging.getLogger(__name__)
 
@@ -43,11 +42,47 @@ class AI(commands.Cog):
         )
         self.bot = bot
 
+    @staticmethod
+    async def send_response(destination, response: str):
+        wrapper = textwrap.TextWrapper(
+            width=2000,
+            break_long_words=True,
+            replace_whitespace=False,
+            break_on_hyphens=False,
+        )
+        chunks = wrapper.wrap(response)
+
+        if not chunks:
+            return
+
+        # First chunk
+        first_chunk = chunks.pop(0)
+
+        # Determine how to send the first message
+        if isinstance(destination, discord.Message):
+            # Reply to a message
+            await destination.reply(first_chunk)
+            # Subsequent messages go to the same channel
+            for chunk in chunks:
+                await destination.channel.send(chunk)
+        elif isinstance(destination, commands.Context):
+            # Send to command context channel
+            await destination.send(first_chunk)
+            for chunk in chunks:
+                await destination.send(chunk)
+        elif isinstance(destination, discord.Webhook):
+            # Send to a webhook (from a deferred interaction)
+            await destination.send(first_chunk)
+            for chunk in chunks:
+                await destination.send(chunk)
+        else:
+            raise TypeError(f"Unsupported destination type: {type(destination)}")
+
     @commands.slash_command()
     async def ask_ai(self, ctx: discord.ApplicationContext, input: str):
         await ctx.defer()
         response = await self.ai_handler.call(input)
-        await ctx.respond(response)
+        await self.send_response(ctx.followup, response)
 
     @commands.message_command(name="AI Reply")
     async def ai_reply(self, ctx, message: discord.Message):
@@ -55,6 +90,7 @@ class AI(commands.Cog):
             title="AI Reply",
             ai_handler=self.ai_handler,
             message_content=message.content,
+            send_response_fn=self.send_response,
         )
         await ctx.send_modal(modal)
 
@@ -66,7 +102,7 @@ class AI(commands.Cog):
                 await ctx.fetch_message(ctx.message.reference.message_id)
             ).content
         response = await self.ai_handler.call(input, replied_to_message_content)
-        await ctx.send(response)
+        await self.send_response(ctx, response)
 
     @commands.Cog.listener()
     async def on_message(self, message: discord.Message):
@@ -85,17 +121,20 @@ class AI(commands.Cog):
             response = await self.ai_handler.call(
                 message.content, replied_to_message_content
             )
-            await message.reply(response)
+            await self.send_response(message, response)
 
         # Allow other listeners and commands to process the message
         # await self.bot.process_commands(message)
 
 
 class AIReplyModal(discord.ui.Modal):
-    def __init__(self, *args, ai_handler, message_content, **kwargs) -> None:
+    def __init__(
+        self, *args, ai_handler, message_content, send_response_fn, **kwargs
+    ) -> None:
         super().__init__(*args, **kwargs)
         self.ai_handler = ai_handler
         self.message_content = message_content
+        self.send_response = send_response_fn
         self.add_item(
             discord.ui.InputText(label="Prompt", style=discord.InputTextStyle.long)
         )
@@ -105,7 +144,7 @@ class AIReplyModal(discord.ui.Modal):
         response = await self.ai_handler.call(
             self.children[0].value, self.message_content
         )
-        await interaction.followup.send(response)
+        await self.send_response(interaction.followup, response)
 
 
 class AIHandler:
@@ -153,7 +192,13 @@ class AIHandler:
             ):
                 response = step["messages"][-1]
                 logger.debug("\n" + self.__get_pretty_print_response_string(response))
-            return response.content
+            logger.info(f"response: {response}")
+            final_content = response.content
+            if isinstance(final_content, list):
+                return final_content[0].get(
+                    "text", "Sorry, I couldn't parse the response."
+                )
+            return final_content
         except ConnectError as e:
             logger.error(f"Error caught: {e}.\nUsing fallback LLM.")
             try:
@@ -168,8 +213,12 @@ class AIHandler:
                     logger.debug(
                         "\n" + self.__get_pretty_print_response_string(response)
                     )
-
-                return response.content
+                final_content = response.content
+                if isinstance(final_content, list):
+                    return final_content[0].get(
+                        "text", "Sorry, I couldn't parse the response."
+                    )
+                return final_content
             except Exception as e:
                 logger.error(f"Unexpected error caught. Error message: {str(e)}")
                 return "AI Error"
@@ -201,8 +250,8 @@ class AIHandler:
             llm for llm in llms if llm != self.current_llm and llm is not None
         ]
 
-        self.current_agent = create_react_agent(
-            self.current_llm, self.tools, prompt=self.ai_system_prompt
+        self.current_agent = create_agent(
+            self.current_llm, self.tools, system_prompt=self.ai_system_prompt
         )
 
     def __setupGroqLLM(self, groq_llm_model: str):
@@ -232,63 +281,26 @@ class AIHandler:
         # Cycle through fallback_llms list, rotating the first element to the end.
         self.current_llm = self.fallback_llms[0]
         self.fallback_llms = self.fallback_llms[1:] + [self.fallback_llms[0]]
-        self.current_agent = create_react_agent(
-            self.current_llm, self.tools, prompt=self.ai_system_prompt
+        self.current_agent = create_agent(
+            self.current_llm, self.tools, system_prompt=self.ai_system_prompt
         )
 
     def __get_tools(self):
-
-        @tool
-        def web_research(query: str):
-            """LangGraph node that performs web research using the native Google Search API tool.
-
-            Executes a web search using the native Google Search API tool in combination with Gemini 2.0 Flash.
-
-            Args:
-                state: Current graph state containing the search query and research loop count
-                config: Configuration for the runnable, including search API settings
-
-            Returns:
-                Dictionary with state update, including sources_gathered, research_loop_count, and web_research_results
-            """
-            # Configure
-            formatted_prompt = web_searcher_instructions.format(
-                current_date=get_current_date(),
-                research_topic=query,
+        tools = []
+        if self.google_api_key and self.google_llm_model:
+            tools.extend(
+                [
+                    WebResearchTool(
+                        google_api_key=self.google_api_key,
+                        google_llm_model=self.google_llm_model,
+                    ),
+                    UrlContextTool(
+                        google_api_key=self.google_api_key,
+                        google_llm_model=self.google_llm_model,
+                    ),
+                ]
             )
-
-            genai_client = Client(api_key=self.google_api_key)
-
-            # Uses the google genai client as the langchain client doesn't return grounding metadata
-            response = genai_client.models.generate_content(
-                model=self.google_llm_model,
-                contents=formatted_prompt,
-                config={
-                    "tools": [{"google_search": {}}],
-                    "temperature": 0,
-                },
-            )
-            # resolve the urls to short urls for saving tokens and time
-            resolved_urls = resolve_urls(
-                response.candidates[0].grounding_metadata.grounding_chunks, 1
-            )
-            # Gets the citations and adds them to the generated text
-            citations = get_citations(response, resolved_urls)
-            modified_text = insert_citation_markers(response.text, citations)
-            sources_gathered = [
-                item for citation in citations for item in citation["segments"]
-            ]
-
-            data = {
-                "sources_gathered": sources_gathered,
-                "search_query": query,
-                "web_research_result": [modified_text],
-            }
-
-            return data["web_research_result"]
-
-        # return [web_search_text_ddg, web_search_image_ddg]
-        return [web_research]
+        return tools
 
     def __get_pretty_print_response_string(self, response):
         pretty_output = ""
