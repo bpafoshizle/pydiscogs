@@ -184,5 +184,5 @@ class Twitch(commands.Cog):
         return await self.twitch_client.search_channels(query, live=True)
 
     async def get_stream_data(self, channels):
-        logger.info("Getting stream data from %s", channels)
+        logger.debug("Getting stream data from %s", channels)
         return await self.twitch_client.fetch_streams(user_ids=channels)
