@@ -13,6 +13,7 @@ from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_groq import ChatGroq
 from langchain_ollama import ChatOllama
 
+# from .tools.computer_control import ComputerControlTool
 from .tools.url_context import UrlContextTool
 from .tools.web_research import WebResearchTool
 
@@ -220,9 +221,11 @@ class AIHandler:
                     )
                 return final_content
             except Exception as e:
+                logger.debug("Exception caught in fallback", exc_info=True)
                 logger.error(f"Unexpected error caught. Error message: {str(e)}")
                 return "AI Error"
         except Exception as e:
+            logger.debug("Exception caught in fallback", exc_info=True)
             logger.error(f"Unexpected error caught. Error message: {str(e)}")
             return "AI Error"
 
@@ -298,6 +301,10 @@ class AIHandler:
                         google_api_key=self.google_api_key,
                         google_llm_model=self.google_llm_model,
                     ),
+                    # Commenting for now. Tool is currently not stable or affordable.
+                    # ComputerControlTool(
+                    #     google_api_key=self.google_api_key,
+                    # ),
                 ]
             )
         return tools
