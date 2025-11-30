@@ -104,7 +104,12 @@ class StockQuote(commands.Cog):
     async def getPrevClose(self, symbol):
         prevClose = self.polygon_client.get_previous_close_agg(symbol)[0]
         logger.debug(prevClose)
-        return (prevClose.ticker, prevClose.close, prevClose.high, prevClose.low)
+        return (
+            prevClose.ticker,
+            float(prevClose.close),
+            float(prevClose.high),
+            float(prevClose.low),
+        )
 
     async def getLatestStockQuote(self, symbol):
         ticker = yf.Ticker(symbol)
