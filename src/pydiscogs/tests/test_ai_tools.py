@@ -3,11 +3,20 @@ Testing AI tools: web_research, url_context, and read_x_post
 """
 
 import os
-import unittest
-from unittest.mock import MagicMock, patch
-
 import sys
-from unittest.mock import MagicMock
+import unittest
+from unittest.mock import AsyncMock, MagicMock, patch
+
+from pydiscogs.cogs.ai.tools.read_x_post import (
+    Expansion,
+    ReadXPostInput,
+    ReadXPostTool,
+    TweetField,
+)
+from pydiscogs.cogs.ai.tools.url_context import UrlContextInput, UrlContextTool
+from pydiscogs.cogs.ai.tools.web_research import WebResearchTool, WebSearchInput
+from pydiscogs.cogs.ai.tools.xai_research import XResearchTool
+
 
 # Mock missing modules to allow imports for tools
 # We use dummy classes for BaseTool/BaseModel to allow inheritance to work
@@ -16,11 +25,14 @@ class MockBaseTool:
         for k, v in kwargs.items():
             setattr(self, k, v)
 
+
 class MockBaseModel:
     pass
 
+
 def MockField(**kwargs):
     return MagicMock()
+
 
 mock_langchain_core_tools = MagicMock()
 mock_langchain_core_tools.BaseTool = MockBaseTool
@@ -46,20 +58,9 @@ sys.modules["langchain_core"] = MagicMock()
 
 # We don't mock pydantic/BaseModel fully because the tools use them for args_schema
 # But if it causes issues we might need to, but usually pydantic is installed or we can mock it carefully.
-# Assuming pydantic IS installed since the user code uses it heavily. 
-# If not, we'd have trouble. But let's assume standard stuff like pydantic might be there 
+# Assuming pydantic IS installed since the user code uses it heavily.
+# If not, we'd have trouble. But let's assume standard stuff like pydantic might be there
 # or if it fails we mock it too. The error was about 'google'.
-
-from pydiscogs.cogs.ai.tools.read_x_post import (
-    Expansion,
-    ReadXPostInput,
-    ReadXPostTool,
-    TweetField,
-)
-from pydiscogs.cogs.ai.tools.url_context import UrlContextInput, UrlContextTool
-from pydiscogs.cogs.ai.tools.web_research import WebResearchTool, WebSearchInput
-from pydiscogs.cogs.ai.tools.xai_research import XResearchTool
-from unittest.mock import AsyncMock
 
 
 class TestWebResearchTool(unittest.TestCase):
@@ -292,20 +293,20 @@ class TestReadXPostTool(unittest.TestCase):
             "created_at": "2024-01-01T12:00:00Z",
         }
         mock_response.data = [mock_post]
-        
+
         # Add comprehensive includes to verify _format_post_data integration
         mock_response.includes = MagicMock()
-        mock_response.includes.users = [{
-            "username": "testuser",
-            "name": "Test User",
-            "description": "Bio",
-            "public_metrics": {"followers_count": 100, "following_count": 10}
-        }]
-        mock_response.includes.media = [{
-            "type": "photo",
-            "url": "http://img.com",
-            "alt_text": "Alt"
-        }]
+        mock_response.includes.users = [
+            {
+                "username": "testuser",
+                "name": "Test User",
+                "description": "Bio",
+                "public_metrics": {"followers_count": 100, "following_count": 10},
+            }
+        ]
+        mock_response.includes.media = [
+            {"type": "photo", "url": "http://img.com", "alt_text": "Alt"}
+        ]
         mock_response.includes.polls = None
         mock_response.includes.places = None
 
@@ -572,7 +573,6 @@ class TestReadXPostTool(unittest.TestCase):
         self.assertIn("Conversation ID: 1234567890", result)
 
 
-
 class TestXResearchTool(unittest.IsolatedAsyncioTestCase):
     """Test cases for XResearchTool"""
 
@@ -588,7 +588,7 @@ class TestXResearchTool(unittest.IsolatedAsyncioTestCase):
 
         # Use the tool's method (instantiate with dummy key)
         tool = XResearchTool(xai_api_key="test_key")
-        
+
         extracted = tool._extract_text_from_msg(mock_msg)
         self.assertEqual(extracted, "Hello\nWorld")
 
@@ -614,7 +614,7 @@ class TestXResearchTool(unittest.IsolatedAsyncioTestCase):
 
             mock_response = MagicMock()
             mock_response.message = mock_assistant_msg
-            
+
             # Ensure content is None to force logic to scan history/message (fallback path)
             # OR ensuring that if it checks message.content it finds our mock_part
             # The tool logic checks `response.content`. If we mock response.content to be None
@@ -627,7 +627,7 @@ class TestXResearchTool(unittest.IsolatedAsyncioTestCase):
             # So the tool must have hit the fallback?
             # Let's set `mock_response.content = None` to be safe and deterministic, forcing fallback to extraction from history
             # which we know works because we populate `mock_chat.messages`.
-            mock_response.content = None 
+            mock_response.content = None
 
             mock_chat.sample = AsyncMock(return_value=mock_response)
             mock_chat.messages = [mock_user_msg, mock_assistant_msg]
