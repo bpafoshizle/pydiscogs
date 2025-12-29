@@ -207,8 +207,10 @@ greenlet==3.2.4
     # via
     #   pydiscogs (pyproject.toml)
     #   playwright
-groq==0.31.1
-    # via langchain-groq
+groq==0.37.1
+    # via
+    #   pydiscogs (pyproject.toml)
+    #   langchain-groq
 grpc-google-iam-v1==0.14.3
     # via
     #   google-cloud-bigtable
