@@ -201,6 +201,7 @@ class TestAI(unittest.IsolatedAsyncioTestCase):
             google_llm_model=os.getenv("GOOGLE_LLM_MODEL"),
             groq_api_key=os.getenv("GROQ_API_KEY"),
             groq_llm_model=os.getenv("GROQ_LLM_MODEL"),
+            xai_api_key=os.getenv("XAI_API_KEY"),
             ai_system_prompt=os.getenv("AI_SYSTEM_PROMPT"),
         )
         events.append("asyncSetUp")
