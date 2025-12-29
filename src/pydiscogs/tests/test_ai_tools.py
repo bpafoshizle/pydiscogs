@@ -3,7 +3,6 @@ Testing AI tools: web_research, url_context, and read_x_post
 """
 
 import os
-import sys
 import unittest
 from unittest.mock import AsyncMock, MagicMock, patch
 
@@ -17,50 +16,8 @@ from pydiscogs.cogs.ai.tools.url_context import UrlContextInput, UrlContextTool
 from pydiscogs.cogs.ai.tools.web_research import WebResearchTool, WebSearchInput
 from pydiscogs.cogs.ai.tools.xai_research import XResearchTool
 
-
-# Mock missing modules to allow imports for tools
-# We use dummy classes for BaseTool/BaseModel to allow inheritance to work
-class MockBaseTool:
-    def __init__(self, **kwargs):
-        for k, v in kwargs.items():
-            setattr(self, k, v)
-
-
-class MockBaseModel:
-    pass
-
-
-def MockField(**kwargs):
-    return MagicMock()
-
-
-mock_langchain_core_tools = MagicMock()
-mock_langchain_core_tools.BaseTool = MockBaseTool
-sys.modules["langchain_core.tools"] = mock_langchain_core_tools
-
-mock_pydantic_v1 = MagicMock()
-mock_pydantic_v1.BaseModel = MockBaseModel
-mock_pydantic_v1.Field = MockField
-sys.modules["pydantic.v1"] = mock_pydantic_v1
-sys.modules["pydantic"] = MagicMock()  # generic pydantic
-
-sys.modules["google"] = MagicMock()
-sys.modules["google.genai"] = MagicMock()
-sys.modules["xai_sdk"] = MagicMock()
-sys.modules["xai_sdk.chat"] = MagicMock()
-sys.modules["xai_sdk.tools"] = MagicMock()
-sys.modules["xdk"] = MagicMock()
-sys.modules["langchain_google_genai"] = MagicMock()
-sys.modules["langchain_groq"] = MagicMock()
-sys.modules["langchain_ollama"] = MagicMock()
-sys.modules["langchain_core"] = MagicMock()
-# sys.modules["langchain_core.tools"] is already set above
-
-# We don't mock pydantic/BaseModel fully because the tools use them for args_schema
-# But if it causes issues we might need to, but usually pydantic is installed or we can mock it carefully.
-# Assuming pydantic IS installed since the user code uses it heavily.
-# If not, we'd have trouble. But let's assume standard stuff like pydantic might be there
-# or if it fails we mock it too. The error was about 'google'.
+# sys.modules mocks removed to prevent interfering with real imports in CI
+# Dependencies should be installed in the environment.
 
 
 class TestWebResearchTool(unittest.TestCase):
