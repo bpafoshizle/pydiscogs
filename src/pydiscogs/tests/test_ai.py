@@ -271,6 +271,56 @@ class TestAI(unittest.IsolatedAsyncioTestCase):
 
         mock_send_response.assert_called_with(mock_context, "test response")
 
+    async def test_get_images_from_message(self):
+        # Test _get_images_from_message helper
+        mock_attachment = MagicMock(spec=discord.Attachment)
+        mock_attachment.content_type = "image/jpeg"
+        mock_attachment.read = AsyncMock(return_value=b"fake_image_data")
+
+        mock_non_image_attachment = MagicMock(spec=discord.Attachment)
+        mock_non_image_attachment.content_type = "text/plain"
+
+        mock_message = MagicMock(spec=discord.Message)
+        mock_message.attachments = [mock_attachment, mock_non_image_attachment]
+
+        ai_cog = AI(bot=MagicMock())
+        images = await ai_cog._get_images_from_message(mock_message)
+
+        self.assertEqual(len(images), 1)
+        self.assertEqual(images[0], (b"fake_image_data", "image/jpeg"))
+
+    @patch("pydiscogs.cogs.ai.cog.AI.send_response", new_callable=AsyncMock)
+    @patch("pydiscogs.cogs.ai.cog.AIHandler")
+    async def test_on_message_with_image(self, MockAIHandler, mock_send_response):
+        # Test on_message with image attachment
+        mock_bot = MagicMock()
+        mock_bot.user.id = 456
+        
+        mock_attachment = MagicMock(spec=discord.Attachment)
+        mock_attachment.content_type = "image/jpeg"
+        mock_attachment.read = AsyncMock(return_value=b"fake_image_data")
+        
+        mock_message = MagicMock(spec=discord.Message)
+        mock_message.author.id = 123
+        mock_message.mentions = [mock_bot.user]
+        mock_message.content = "what is this?"
+        mock_message.attachments = [mock_attachment]
+        mock_message.reference = None
+        
+        mock_ai_handler = MockAIHandler.return_value
+        async def async_return(ret_val):
+            return ret_val
+        mock_ai_handler.call.return_value = async_return("test response")
+
+        ai_cog = AI(bot=mock_bot)
+        ai_cog.ai_handler = mock_ai_handler
+        await ai_cog.on_message(mock_message)
+
+        mock_ai_handler.call.assert_called_with(
+            "what is this?", None, images=[(b"fake_image_data", "image/jpeg")]
+        )
+        mock_send_response.assert_called_with(mock_message, "test response")
+
     @patch("pydiscogs.cogs.ai.cog.AI.send_response", new_callable=AsyncMock)
     @patch("pydiscogs.cogs.ai.cog.AIHandler")
     async def test_on_message(self, MockAIHandler, mock_send_response):

@@ -1,3 +1,4 @@
+import base64
 import contextlib
 import io
 import logging
@@ -14,6 +15,7 @@ from langchain_groq import ChatGroq
 from langchain_ollama import ChatOllama
 
 # from .tools.computer_control import ComputerControlTool
+from .tools.read_x_post import ReadXPostTool
 from .tools.url_context import UrlContextTool
 from .tools.web_research import WebResearchTool
 
@@ -80,17 +82,32 @@ class AI(commands.Cog):
             raise TypeError(f"Unsupported destination type: {type(destination)}")
 
     @commands.slash_command()
-    async def ask_ai(self, ctx: discord.ApplicationContext, input: str):
+    async def ask_ai(
+        self,
+        ctx: discord.ApplicationContext,
+        input: str,
+        attachment: discord.Attachment = None,
+    ):
         await ctx.defer()
-        response = await self.ai_handler.call(input)
+        images = []
+        if (
+            attachment
+            and attachment.content_type
+            and attachment.content_type.startswith("image/")
+        ):
+            images.append((await attachment.read(), attachment.content_type))
+        response = await self.ai_handler.call(input, images=images)
+
         await self.send_response(ctx.followup, response)
 
     @commands.message_command(name="AI Reply")
     async def ai_reply(self, ctx, message: discord.Message):
+        images = await self._get_images_from_message(message)
         modal = AIReplyModal(
             title="AI Reply",
             ai_handler=self.ai_handler,
             message_content=message.content,
+            images=images,
             send_response_fn=self.send_response,
         )
         await ctx.send_modal(modal)
@@ -98,12 +115,29 @@ class AI(commands.Cog):
     @commands.command()
     async def ai(self, ctx, *, input: str):
         replied_to_message_content = None
+        images = await self._get_images_from_message(ctx.message)
+
         if ctx.message.reference:
-            replied_to_message_content = (
-                await ctx.fetch_message(ctx.message.reference.message_id)
-            ).content
-        response = await self.ai_handler.call(input, replied_to_message_content)
+            replied_to_message = await ctx.fetch_message(
+                ctx.message.reference.message_id
+            )
+            replied_to_message_content = replied_to_message.content
+            # Also check for images in the replied-to message
+            images.extend(await self._get_images_from_message(replied_to_message))
+
+        response = await self.ai_handler.call(
+            input, replied_to_message_content, images=images
+        )
         await self.send_response(ctx, response)
+
+    async def _get_images_from_message(
+        self, message: discord.Message
+    ) -> list[tuple[bytes, str]]:
+        images = []
+        for attachment in message.attachments:
+            if attachment.content_type and attachment.content_type.startswith("image/"):
+                images.append((await attachment.read(), attachment.content_type))
+        return images
 
     @commands.Cog.listener()
     async def on_message(self, message: discord.Message):
@@ -115,12 +149,18 @@ class AI(commands.Cog):
         if self.bot.user in message.mentions:
             # await message.reply("Thanks for mentioning me!")  # Reply to the message
             replied_to_message_content = None
+            images = await self._get_images_from_message(message)
+
             if message.reference:
-                replied_to_message_content = (
-                    await message.channel.fetch_message(message.reference.message_id)
-                ).content
+                replied_to_message = await message.channel.fetch_message(
+                    message.reference.message_id
+                )
+                replied_to_message_content = replied_to_message.content
+                # Also check for images in the replied-to message
+                images.extend(await self._get_images_from_message(replied_to_message))
+
             response = await self.ai_handler.call(
-                message.content, replied_to_message_content
+                message.content, replied_to_message_content, images=images
             )
             await self.send_response(message, response)
 
@@ -130,11 +170,12 @@ class AI(commands.Cog):
 
 class AIReplyModal(discord.ui.Modal):
     def __init__(
-        self, *args, ai_handler, message_content, send_response_fn, **kwargs
+        self, *args, ai_handler, message_content, images=None, send_response_fn, **kwargs
     ) -> None:
         super().__init__(*args, **kwargs)
         self.ai_handler = ai_handler
         self.message_content = message_content
+        self.images = images
         self.send_response = send_response_fn
         self.add_item(
             discord.ui.InputText(label="Prompt", style=discord.InputTextStyle.long)
@@ -143,7 +184,7 @@ class AIReplyModal(discord.ui.Modal):
     async def callback(self, interaction: discord.Interaction):
         await interaction.response.defer()
         response = await self.ai_handler.call(
-            self.children[0].value, self.message_content
+            self.children[0].value, self.message_content, images=self.images
         )
         await self.send_response(interaction.followup, response)
 
@@ -176,15 +217,34 @@ class AIHandler:
 
         self.__setupLLMs()
 
-    async def call(self, input: str, replied_to_message_content: str = ""):
-        messages = {
-            "messages": [
-                HumanMessage(
-                    content=f"previous message being replied to: {replied_to_message_content}"
-                ),
-                HumanMessage(content=input),
-            ]
-        }
+    async def call(
+        self,
+        input: str,
+        replied_to_message_content: str = "",
+        images: list[tuple[bytes, str]] = None,
+    ):
+        content = []
+        if replied_to_message_content:
+            content.append(
+                {
+                    "type": "text",
+                    "text": f"previous message being replied to: {replied_to_message_content}",
+                }
+            )
+
+        content.append({"type": "text", "text": input})
+
+        if images:
+            for image_bytes, content_type in images:
+                encoded = base64.b64encode(image_bytes).decode("utf-8")
+                content.append(
+                    {
+                        "type": "image_url",
+                        "image_url": f"data:{content_type};base64,{encoded}",
+                    }
+                )
+
+        messages = {"messages": [HumanMessage(content=content)]}
 
         try:
             async for step in self.current_agent.astream(
@@ -301,6 +361,7 @@ class AIHandler:
                         google_api_key=self.google_api_key,
                         google_llm_model=self.google_llm_model,
                     ),
+                    ReadXPostTool(),
                     # Commenting for now. Tool is currently not stable or affordable.
                     # ComputerControlTool(
                     #     google_api_key=self.google_api_key,

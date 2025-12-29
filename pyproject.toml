@@ -1,6 +1,6 @@
 [project]
 name = "pydiscogs"
-version = "0.5.1"
+version = "0.5.2"
 description = "A collection of cogs that can be used to add functionality to a Discord.py bot"
 readme = "README.md"
 requires-python = ">=3.13"
@@ -33,7 +33,8 @@ dependencies = [
     "yfinance==0.2.63",
     "zstandard==0.25.0",
     "uvloop",
-    "termcolor"
+    "termcolor",
+    "xdk>=0.2.7b0",
 ]
 
 [build-system]

@@ -46,5 +46,5 @@ class UrlContextTool(BaseTool):
                 "temperature": 0,
             },
         )
-        logger.info(f"url_context tool response: {response}")
+        logger.debug(f"url_context tool response: {response}")
         return response.text
