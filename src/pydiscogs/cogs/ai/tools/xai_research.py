@@ -1,12 +1,12 @@
 import logging
 import re
-from typing import Type, Any
+from typing import Any, Type
 
 from langchain_core.tools import BaseTool
 from pydantic.v1 import BaseModel, Field
 from xai_sdk import AsyncClient
 from xai_sdk.chat import user
-from xai_sdk.tools import x_search, web_search
+from xai_sdk.tools import web_search, x_search
 
 logger = logging.getLogger(__name__)
 
@@ -34,37 +34,33 @@ class XResearchTool(BaseTool):
         """Use the tool asynchronously."""
         try:
             client = AsyncClient(api_key=self.xai_api_key)
-            
+
             # Create a chat session with search tools enabled
             chat = client.chat.create(
-                model="grok-4-1-fast",
-                tools=[
-                    x_search(),
-                    web_search()
-                ]
+                model="grok-4-1-fast", tools=[x_search(), web_search()]
             )
-            
+
             # Refine query for URLs to ensure research-mode is triggered
             refined_query = query
-            if re.search(r'(twitter\.com|x\.com)/\w+/status/\d+', query):
+            if re.search(r"(twitter\.com|x\.com)/\w+/status/\d+", query):
                 refined_query = f"Please research and provide a concise summary or TLDR of this X post: {query}"
-            
+
             # Append query to state
             chat.append(user(refined_query))
-            
+
             # Sample Grok for a response
             response = await chat.sample()
             logger.debug(f"XResearchTool sample response: {response}")
 
             # Based on logs, the response object HAS 'content' attribute directly exposed.
             # It seems the SDK flattens the final result into response.content for easy access.
-            if hasattr(response, 'content') and response.content:
+            if hasattr(response, "content") and response.content:
                 logger.debug(f"XResearchTool found direct content: {response.content}")
                 if isinstance(response.content, str):
                     return response.content
                 # If it's a list or object, try to stringify or join it
-                if hasattr(response.content, '__iter__'):
-                     return "\n".join([str(c) for c in response.content])
+                if hasattr(response.content, "__iter__"):
+                    return "\n".join([str(c) for c in response.content])
                 return str(response.content)
 
             # Fallback: check if we can access the raw proto or hidden fields if specific attributes are missing
@@ -76,11 +72,11 @@ class XResearchTool(BaseTool):
             if chat.messages:
                 for i, msg in enumerate(reversed(chat.messages)):
                     logger.debug(f"XResearchTool msg {i} (reversed): {msg}")
-                    if hasattr(msg, 'role') and msg.role == 2:
+                    if hasattr(msg, "role") and msg.role == 2:
                         text = self._extract_text_from_msg(msg)
                         if text:
                             return text
-            
+
             return "Error: Could not extract assistant response from Xai."
 
         except Exception as e:
@@ -89,26 +85,26 @@ class XResearchTool(BaseTool):
 
     def _extract_text_from_msg(self, msg: Any) -> str:
         """Helper to extract text from a Message object or similar."""
-        if not hasattr(msg, 'content'):
+        if not hasattr(msg, "content"):
             return ""
-        
+
         content_objects = msg.content
         texts = []
-        
+
         # content is often a RepeatedCompositeContainer (list-like) or just a string/attr
         if isinstance(content_objects, str):
-             texts.append(content_objects)
-        elif hasattr(content_objects, '__iter__'):
+            texts.append(content_objects)
+        elif hasattr(content_objects, "__iter__"):
             for item in content_objects:
-                if hasattr(item, 'text') and item.text:
+                if hasattr(item, "text") and item.text:
                     texts.append(item.text)
                 elif isinstance(item, str):
                     texts.append(item)
-        elif hasattr(content_objects, 'text') and content_objects.text:
+        elif hasattr(content_objects, "text") and content_objects.text:
             texts.append(content_objects.text)
         else:
-             texts.append(str(content_objects))
-            
+            texts.append(str(content_objects))
+
         return "\n".join(texts).strip()
 
     def _run(self, query: str) -> str:

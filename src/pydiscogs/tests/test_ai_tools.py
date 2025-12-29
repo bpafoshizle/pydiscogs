@@ -6,14 +6,14 @@ import os
 import unittest
 from unittest.mock import MagicMock, patch
 
-from pydiscogs.cogs.ai.tools.web_research import WebResearchTool, WebSearchInput
-from pydiscogs.cogs.ai.tools.url_context import UrlContextTool, UrlContextInput
 from pydiscogs.cogs.ai.tools.read_x_post import (
-    ReadXPostTool,
-    ReadXPostInput,
-    TweetField,
     Expansion,
+    ReadXPostInput,
+    ReadXPostTool,
+    TweetField,
 )
+from pydiscogs.cogs.ai.tools.url_context import UrlContextInput, UrlContextTool
+from pydiscogs.cogs.ai.tools.web_research import WebResearchTool, WebSearchInput
 
 
 class TestWebResearchTool(unittest.TestCase):
@@ -216,9 +216,7 @@ class TestReadXPostTool(unittest.TestCase):
     def test_extract_post_id_from_twitter_url(self):
         """Test _extract_post_id with twitter.com URL"""
         tool = ReadXPostTool()
-        result = tool._extract_post_id(
-            "https://twitter.com/username/status/9876543210"
-        )
+        result = tool._extract_post_id("https://twitter.com/username/status/9876543210")
         self.assertEqual(result, "9876543210")
 
     def test_extract_post_id_with_url_parameters(self):
@@ -291,9 +289,7 @@ class TestReadXPostTool(unittest.TestCase):
     @patch("pydiscogs.cogs.ai.tools.read_x_post.Client")
     def test_run_with_api_error(self, MockClient):
         """Test error handling when X client raises an exception"""
-        MockClient.return_value.posts.get_by_ids.side_effect = Exception(
-            "X API Error"
-        )
+        MockClient.return_value.posts.get_by_ids.side_effect = Exception("X API Error")
 
         tool = ReadXPostTool()
         result = tool._run(url_or_id="1234567890")

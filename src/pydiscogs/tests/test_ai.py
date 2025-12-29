@@ -295,21 +295,23 @@ class TestAI(unittest.IsolatedAsyncioTestCase):
         # Test on_message with image attachment
         mock_bot = MagicMock()
         mock_bot.user.id = 456
-        
+
         mock_attachment = MagicMock(spec=discord.Attachment)
         mock_attachment.content_type = "image/jpeg"
         mock_attachment.read = AsyncMock(return_value=b"fake_image_data")
-        
+
         mock_message = MagicMock(spec=discord.Message)
         mock_message.author.id = 123
         mock_message.mentions = [mock_bot.user]
         mock_message.content = "what is this?"
         mock_message.attachments = [mock_attachment]
         mock_message.reference = None
-        
+
         mock_ai_handler = MockAIHandler.return_value
+
         async def async_return(ret_val):
             return ret_val
+
         mock_ai_handler.call.return_value = async_return("test response")
 
         ai_cog = AI(bot=mock_bot)

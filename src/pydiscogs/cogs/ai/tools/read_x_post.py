@@ -13,6 +13,7 @@ logger = logging.getLogger(__name__)
 
 class TweetField(str, Enum):
     """Available tweet fields from X API v2."""
+
     ARTICLE = "article"
     ATTACHMENTS = "attachments"
     AUTHOR_ID = "author_id"
@@ -47,6 +48,7 @@ class TweetField(str, Enum):
 
 class Expansion(str, Enum):
     """Available expansions from X API v2."""
+
     ARTICLE_COVER_MEDIA = "article.cover_media"
     ARTICLE_MEDIA_ENTITIES = "article.media_entities"
     ATTACHMENTS_MEDIA_KEYS = "attachments.media_keys"
@@ -59,12 +61,15 @@ class Expansion(str, Enum):
     IN_REPLY_TO_USER_ID = "in_reply_to_user_id"
     ENTITIES_NOTE_MENTIONS_USERNAME = "entities.note.mentions.username"
     REFERENCED_TWEETS_ID = "referenced_tweets.id"
-    REFERENCED_TWEETS_ID_ATTACHMENTS_MEDIA_KEYS = "referenced_tweets.id.attachments.media_keys"
+    REFERENCED_TWEETS_ID_ATTACHMENTS_MEDIA_KEYS = (
+        "referenced_tweets.id.attachments.media_keys"
+    )
     REFERENCED_TWEETS_ID_AUTHOR_ID = "referenced_tweets.id.author_id"
 
 
 class MediaField(str, Enum):
     """Available media fields from X API v2."""
+
     ALT_TEXT = "alt_text"
     DURATION_MS = "duration_ms"
     HEIGHT = "height"
@@ -82,6 +87,7 @@ class MediaField(str, Enum):
 
 class PollField(str, Enum):
     """Available poll fields from X API v2."""
+
     DURATION_MINUTES = "duration_minutes"
     END_DATETIME = "end_datetime"
     ID = "id"
@@ -91,6 +97,7 @@ class PollField(str, Enum):
 
 class UserField(str, Enum):
     """Available user fields from X API v2."""
+
     AFFILIATION = "affiliation"
     CONFIRMED_EMAIL = "confirmed_email"
     CONNECTION_STATUS = "connection_status"
@@ -121,6 +128,7 @@ class UserField(str, Enum):
 
 class PlaceField(str, Enum):
     """Available place fields from X API v2."""
+
     CONTAINED_WITHIN = "contained_within"
     COUNTRY = "country"
     COUNTRY_CODE = "country_code"
@@ -213,19 +221,15 @@ DEFAULT_PLACE_FIELDS = [
 
 
 class ReadXPostInput(BaseModel):
-    url_or_id: str = Field(
-        description="The URL or ID of the X (Twitter) post to read."
-    )
+    url_or_id: str = Field(description="The URL or ID of the X (Twitter) post to read.")
 
 
 class ReadXPostTool(BaseTool):
-    """A tool for reading an X (Twitter) post given a URL or post ID. Links to posts on X (formerly twitter) 
+    """A tool for reading an X (Twitter) post given a URL or post ID. Links to posts on X (formerly twitter)
     cannot be read by normal web or url reading tools."""
 
     name: str = "read_x_post"
-    description: str = (
-        "Reads the content of an X (Twitter) post given its URL or ID."
-    )
+    description: str = "Reads the content of an X (Twitter) post given its URL or ID."
     args_schema: Type[BaseModel] = ReadXPostInput
 
     # Configurable fields and expansions
@@ -261,16 +265,16 @@ class ReadXPostTool(BaseTool):
             }
 
             response = client.posts.get_by_ids(**params)
-            
+
             if not response or not response.data:
                 return f"Error: No post found with ID {post_id}."
-            
+
             logger.debug(f"Full X Post Data: {response.data}")
-            
+
             # Format comprehensive response
             post = response.data[0]
             result = self._format_post_data(post, response)
-            
+
             return result
 
         except Exception as e:
@@ -280,123 +284,133 @@ class ReadXPostTool(BaseTool):
     def _format_post_data(self, post: dict, response) -> str:
         """Format the post data into a readable string with all available information."""
         lines = ["=== X Post ===\n"]
-        
+
         # Basic info
         lines.append(f"Text: {post.get('text', 'N/A')}")
         lines.append(f"ID: {post.get('id', 'N/A')}")
-        
-        if 'created_at' in post:
+
+        if "created_at" in post:
             lines.append(f"Created: {post['created_at']}")
-        
+
         # Article content (expanded content from X articles)
-        if 'article' in post:
-            article = post['article']
-            lines.append(f"\n=== Article Content ===")
-            
-            if 'title' in article:
+        if "article" in post:
+            article = post["article"]
+            lines.append("\n=== Article Content ===")
+
+            if "title" in article:
                 lines.append(f"\nTitle: {article['title']}")
-            
+
             # if 'preview_text' in article:
             #     lines.append(f"\nPreview: {article['preview_text']}")
-            
-            if 'plain_text' in article:
-                lines.append(f"\n--- Full Article Text ---")
-                lines.append(article['plain_text'])
+
+            if "plain_text" in article:
+                lines.append("\n--- Full Article Text ---")
+                lines.append(article["plain_text"])
                 lines.append("--- End Article Text ---")
-            
-            if 'cover_media' in article:
+
+            if "cover_media" in article:
                 lines.append(f"\nCover Media ID: {article['cover_media']}")
-            
-            if 'media_entities' in article and article['media_entities']:
+
+            if "media_entities" in article and article["media_entities"]:
                 lines.append(f"Article Media: {', '.join(article['media_entities'])}")
-        
+
         # Metrics
-        if 'public_metrics' in post:
-            metrics = post['public_metrics']
-            lines.append(f"\nEngagement Metrics:")
+        if "public_metrics" in post:
+            metrics = post["public_metrics"]
+            lines.append("\nEngagement Metrics:")
             lines.append(f"  - Retweets: {metrics.get('retweet_count', 0)}")
             lines.append(f"  - Replies: {metrics.get('reply_count', 0)}")
             lines.append(f"  - Likes: {metrics.get('like_count', 0)}")
             lines.append(f"  - Quotes: {metrics.get('quote_count', 0)}")
             lines.append(f"  - Bookmarks: {metrics.get('bookmark_count', 0)}")
             lines.append(f"  - Impressions: {metrics.get('impression_count', 0)}")
-        
+
         # Author info (from includes)
-        if hasattr(response, 'includes') and response.includes:
+        if hasattr(response, "includes") and response.includes:
             includes = response.includes
-            
-            if hasattr(includes, 'users') and includes.users:
+
+            if hasattr(includes, "users") and includes.users:
                 user = includes.users[0]
-                lines.append(f"\nAuthor: @{user.get('username', 'N/A')} ({user.get('name', 'N/A')})")
-                if 'description' in user:
+                lines.append(
+                    f"\nAuthor: @{user.get('username', 'N/A')} ({user.get('name', 'N/A')})"
+                )
+                if "description" in user:
                     lines.append(f"Bio: {user['description']}")
-                if 'public_metrics' in user:
-                    um = user['public_metrics']
-                    lines.append(f"Followers: {um.get('followers_count', 0)} | Following: {um.get('following_count', 0)}")
-            
+                if "public_metrics" in user:
+                    um = user["public_metrics"]
+                    lines.append(
+                        f"Followers: {um.get('followers_count', 0)} | Following: {um.get('following_count', 0)}"
+                    )
+
             # Media info
-            if hasattr(includes, 'media') and includes.media:
+            if hasattr(includes, "media") and includes.media:
                 lines.append(f"\nMedia: {len(includes.media)} item(s)")
                 for i, media in enumerate(includes.media, 1):
-                    media_type = media.get('type', 'unknown')
+                    media_type = media.get("type", "unknown")
                     lines.append(f"  {i}. Type: {media_type}")
-                    if 'url' in media:
+                    if "url" in media:
                         lines.append(f"     URL: {media['url']}")
-                    if 'alt_text' in media:
+                    if "alt_text" in media:
                         lines.append(f"     Alt: {media['alt_text']}")
-            
+
             # Poll info
-            if hasattr(includes, 'polls') and includes.polls:
+            if hasattr(includes, "polls") and includes.polls:
                 poll = includes.polls[0]
                 lines.append(f"\nPoll: {poll.get('voting_status', 'unknown')}")
-                if 'options' in poll:
-                    for opt in poll['options']:
-                        lines.append(f"  - {opt.get('label', 'N/A')}: {opt.get('votes', 0)} votes")
-            
+                if "options" in poll:
+                    for opt in poll["options"]:
+                        lines.append(
+                            f"  - {opt.get('label', 'N/A')}: {opt.get('votes', 0)} votes"
+                        )
+
             # Place info
-            if hasattr(includes, 'places') and includes.places:
+            if hasattr(includes, "places") and includes.places:
                 place = includes.places[0]
                 lines.append(f"\nLocation: {place.get('full_name', 'N/A')}")
-        
+
         # Entities (URLs, mentions, hashtags)
-        if 'entities' in post:
-            entities = post['entities']
-            if 'urls' in entities and entities['urls']:
+        if "entities" in post:
+            entities = post["entities"]
+            if "urls" in entities and entities["urls"]:
                 lines.append(f"\nURLs: {len(entities['urls'])} link(s)")
-                for url in entities['urls']:
-                    lines.append(f"  - {url.get('expanded_url', url.get('url', 'N/A'))}")
-            
-            if 'mentions' in entities and entities['mentions']:
-                mentions = [f"@{m['username']}" for m in entities['mentions']]
+                for url in entities["urls"]:
+                    lines.append(
+                        f"  - {url.get('expanded_url', url.get('url', 'N/A'))}"
+                    )
+
+            if "mentions" in entities and entities["mentions"]:
+                mentions = [f"@{m['username']}" for m in entities["mentions"]]
                 lines.append(f"\nMentions: {', '.join(mentions)}")
-            
-            if 'hashtags' in entities and entities['hashtags']:
-                hashtags = [f"#{h['tag']}" for h in entities['hashtags']]
+
+            if "hashtags" in entities and entities["hashtags"]:
+                hashtags = [f"#{h['tag']}" for h in entities["hashtags"]]
                 lines.append(f"\nHashtags: {', '.join(hashtags)}")
-        
+
         # Referenced tweets (replies, quotes, retweets)
-        if 'referenced_tweets' in post:
-            lines.append(f"\nReferenced Tweets:")
-            for ref in post['referenced_tweets']:
-                lines.append(f"  - {ref.get('type', 'unknown')}: {ref.get('id', 'N/A')}")
-        
+        if "referenced_tweets" in post:
+            lines.append("\nReferenced Tweets:")
+            for ref in post["referenced_tweets"]:
+                lines.append(
+                    f"  - {ref.get('type', 'unknown')}: {ref.get('id', 'N/A')}"
+                )
+
         # Additional metadata
-        if 'lang' in post:
+        if "lang" in post:
             lines.append(f"\nLanguage: {post['lang']}")
-        
-        if 'source' in post:
+
+        if "source" in post:
             lines.append(f"Source: {post['source']}")
-        
-        if 'conversation_id' in post:
+
+        if "conversation_id" in post:
             lines.append(f"Conversation ID: {post['conversation_id']}")
-        
+
         return "\n".join(lines)
 
     def _extract_post_id(self, url_or_id: str) -> Optional[str]:
         # Check if it's already just digits
         if re.match(r"^\d+$", url_or_id):
             return url_or_id
-        
+
         # Try to extract from URL
         # Matches patterns like:
         # https://x.com/username/status/1234567890
@@ -404,5 +418,5 @@ class ReadXPostTool(BaseTool):
         match = re.search(r"status/(\d+)", url_or_id)
         if match:
             return match.group(1)
-        
+
         return None

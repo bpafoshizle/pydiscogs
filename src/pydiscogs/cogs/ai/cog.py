@@ -172,7 +172,13 @@ class AI(commands.Cog):
 
 class AIReplyModal(discord.ui.Modal):
     def __init__(
-        self, *args, ai_handler, message_content, images=None, send_response_fn, **kwargs
+        self,
+        *args,
+        ai_handler,
+        message_content,
+        images=None,
+        send_response_fn,
+        **kwargs,
     ) -> None:
         super().__init__(*args, **kwargs)
         self.ai_handler = ai_handler
