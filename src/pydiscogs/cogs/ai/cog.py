@@ -15,9 +15,9 @@ from langchain_groq import ChatGroq
 from langchain_ollama import ChatOllama
 
 # from .tools.computer_control import ComputerControlTool
-from .tools.read_x_post import ReadXPostTool
 from .tools.url_context import UrlContextTool
 from .tools.web_research import WebResearchTool
+from .tools.xai_research import XResearchTool
 
 logger = logging.getLogger(__name__)
 
@@ -32,6 +32,7 @@ class AI(commands.Cog):
         google_llm_model: str = os.getenv("GOOGLE_LLM_MODEL"),
         groq_api_key: str = os.getenv("GROQ_API_KEY"),
         groq_llm_model: str = os.getenv("GROQ_LLM_MODEL"),
+        xai_api_key: str = os.getenv("XAI_API_KEY"),
         ai_system_prompt: str = os.getenv("AI_SYSTEM_PROMPT"),
     ):
         self.ai_handler = AIHandler(
@@ -41,6 +42,7 @@ class AI(commands.Cog):
             google_llm_model,
             groq_api_key,
             groq_llm_model,
+            xai_api_key,
             ai_system_prompt,
         )
         self.bot = bot
@@ -198,6 +200,7 @@ class AIHandler:
         google_llm_model: str = None,
         groq_api_key: str = None,
         groq_llm_model: str = None,
+        xai_api_key: str = None,
         ai_system_prompt: str = None,
     ):
         self.ollama_endpoint = ollama_endpoint or os.getenv("OLLAMA_ENDPOINT")
@@ -206,6 +209,7 @@ class AIHandler:
         self.google_llm_model = google_llm_model or os.getenv("GOOGLE_LLM_MODEL")
         self.groq_api_key = groq_api_key or os.getenv("GROQ_API_KEY")
         self.groq_llm_model = groq_llm_model or os.getenv("GROQ_LLM_MODEL")
+        self.xai_api_key = xai_api_key or os.getenv("XAI_API_KEY")
         self.ai_system_prompt = ai_system_prompt or os.getenv("AI_SYSTEM_PROMPT")
 
         if not any([self.ollama_endpoint, self.groq_api_key, self.google_api_key]):
@@ -252,8 +256,13 @@ class AIHandler:
                 stream_mode="values",
             ):
                 response = step["messages"][-1]
-                logger.debug("\n" + self.__get_pretty_print_response_string(response))
-            logger.info(f"response: {response}")
+                logger.debug(
+                    "\n"
+                    + self.__get_pretty_print_response_string(
+                        self.__sanitize_message(response)
+                    )
+                )
+            logger.info(f"response: {self.__sanitize_message(response)}")
             final_content = response.content
             if isinstance(final_content, list):
                 return final_content[0].get(
@@ -272,7 +281,10 @@ class AIHandler:
                 ):
                     response = step["messages"][-1]
                     logger.debug(
-                        "\n" + self.__get_pretty_print_response_string(response)
+                        "\n"
+                        + self.__get_pretty_print_response_string(
+                            self.__sanitize_message(response)
+                        )
                     )
                 final_content = response.content
                 if isinstance(final_content, list):
@@ -361,13 +373,12 @@ class AIHandler:
                         google_api_key=self.google_api_key,
                         google_llm_model=self.google_llm_model,
                     ),
-                    ReadXPostTool(),
-                    # Commenting for now. Tool is currently not stable or affordable.
-                    # ComputerControlTool(
-                    #     google_api_key=self.google_api_key,
-                    # ),
                 ]
             )
+
+        if self.xai_api_key:
+            tools.append(XResearchTool(xai_api_key=self.xai_api_key))
+
         return tools
 
     def __get_pretty_print_response_string(self, response):
@@ -378,3 +389,27 @@ class AIHandler:
             pretty_output = buf.getvalue()
 
         return pretty_output
+
+    def __sanitize_message(self, message):
+        """Sanitize message for logging by truncating large base64 image data."""
+        import copy
+
+        if not isinstance(message.content, list):
+            return message
+
+        sanitized_content = []
+        for item in message.content:
+            if isinstance(item, dict) and item.get("type") == "image_url":
+                # Create a copy and truncate the base64 data
+                new_item = copy.deepcopy(item)
+                image_url = new_item.get("image_url", "")
+                if ";base64," in image_url:
+                    parts = image_url.split(";base64,")
+                    new_item["image_url"] = parts[0] + ";base64,...[TRUNCATED]"
+                sanitized_content.append(new_item)
+            else:
+                sanitized_content.append(item)
+
+        sanitized_message = copy.copy(message)
+        sanitized_message.content = sanitized_content
+        return sanitized_message

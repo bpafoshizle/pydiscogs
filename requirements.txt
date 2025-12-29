@@ -12,6 +12,7 @@ aiohttp==3.12.15
     #   asyncprawcore
     #   py-cord
     #   twitchio
+    #   xai-sdk
 aiosignal==1.4.0
     # via aiohttp
 aiosqlite==0.17.0
@@ -231,6 +232,7 @@ grpcio==1.74.0
     #   grpc-google-iam-v1
     #   grpc-interceptor
     #   grpcio-status
+    #   xai-sdk
 grpcio-status==1.71.2
     # via google-api-core
 h11==0.16.0
@@ -327,6 +329,8 @@ numpy==2.3.2
     #   pandas
     #   shapely
     #   yfinance
+oauthlib==3.3.1
+    # via requests-oauthlib
 ollama==0.6.0
     # via
     #   pydiscogs (pyproject.toml)
@@ -377,6 +381,7 @@ opentelemetry-sdk==1.37.0
     #   opentelemetry-exporter-gcp-trace
     #   opentelemetry-exporter-otlp-proto-http
     #   opentelemetry-resourcedetector-gcp
+    #   xai-sdk
 opentelemetry-semantic-conventions==0.58b0
     # via opentelemetry-sdk
 orjson==3.11.3
@@ -391,6 +396,7 @@ packaging==25.0
     #   google-cloud-bigquery
     #   langchain-core
     #   langsmith
+    #   xai-sdk
 pandas==2.3.2
     # via yfinance
 peewee==3.18.2
@@ -443,6 +449,7 @@ protobuf==5.29.5
     #   grpcio-status
     #   opentelemetry-proto
     #   proto-plus
+    #   xai-sdk
     #   yfinance
 py-cord==2.6.1
     # via pydiscogs (pyproject.toml)
@@ -471,6 +478,8 @@ pydantic==2.11.7
     #   mcp
     #   ollama
     #   pydantic-settings
+    #   xai-sdk
+    #   xdk
 pydantic-core==2.33.2
     # via pydantic
 pydantic-settings==2.12.0
@@ -517,9 +526,14 @@ requests==2.32.5
     #   langsmith
     #   opentelemetry-exporter-otlp-proto-http
     #   opentelemetry-resourcedetector-gcp
+    #   requests-oauthlib
     #   requests-toolbelt
     #   update-checker
+    #   xai-sdk
+    #   xdk
     #   yfinance
+requests-oauthlib==2.0.0
+    # via xdk
 requests-toolbelt==1.0.0
     # via langsmith
 rpds-py==0.29.0
@@ -616,6 +630,10 @@ websockets==15.0.1
     #   google-genai
     #   polygon-api-client
     #   yfinance
+xai-sdk==1.5.0
+    # via pydiscogs (pyproject.toml)
+xdk==0.5.0
+    # via pydiscogs (pyproject.toml)
 xvfbwrapper==0.2.9
     # via pydiscogs (pyproject.toml)
 xxhash==3.5.0
