@@ -3,7 +3,7 @@ name = "pydiscogs"
 version = "0.5.2"
 description = "A collection of cogs that can be used to add functionality to a Discord.py bot"
 readme = "README.md"
-requires-python = "~=3.13.0"
+requires-python = "==3.13.1"
 dependencies = [
     "asyncpraw==7.8.1",
     "audioop-lts>=0.2.1",
