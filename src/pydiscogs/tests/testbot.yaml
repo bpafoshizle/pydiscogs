@@ -50,4 +50,5 @@ cogs:
       googleLLMModel: !ENV ${GOOGLE_LLM_MODEL}
       groqAPIKey:  !ENV ${GROQ_API_KEY:}
       groqLLMModel: !ENV ${GROQ_LLM_MODEL}
+      xaiAPIKey: !ENV ${XAI_API_KEY}
       systemPrompt: !ENV ${AI_SYSTEM_PROMPT}
