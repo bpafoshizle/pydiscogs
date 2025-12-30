@@ -28,7 +28,6 @@ dependencies = [
     "greenlet>3.0.3",
     "google-adk==1.17.0",
     "xvfbwrapper==0.2.9",
-    "playwright==1.56.0",
     "twitchio==3.1.0",
     "yfinance==0.2.63",
     "zstandard==0.25.0",

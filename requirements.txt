@@ -204,9 +204,7 @@ googleapis-common-protos==1.70.0
 graphviz==0.21
     # via google-adk
 greenlet==3.2.4
-    # via
-    #   pydiscogs (pyproject.toml)
-    #   playwright
+    # via pydiscogs (pyproject.toml)
 groq==0.37.1
     # via
     #   pydiscogs (pyproject.toml)
@@ -405,8 +403,6 @@ peewee==3.18.2
     # via yfinance
 platformdirs==4.4.0
     # via yfinance
-playwright==1.56.0
-    # via pydiscogs (pyproject.toml)
 polygon-api-client==1.16.3
     # via pydiscogs (pyproject.toml)
 primp==0.15.0
@@ -486,8 +482,6 @@ pydantic-core==2.33.2
     # via pydantic
 pydantic-settings==2.12.0
     # via mcp
-pyee==13.0.0
-    # via playwright
 pyjwt==2.10.1
     # via mcp
 pyparsing==3.2.5
@@ -598,7 +592,6 @@ typing-extensions==4.15.0
     #   opentelemetry-semantic-conventions
     #   pydantic
     #   pydantic-core
-    #   pyee
     #   sqlalchemy
     #   typing-inspection
 typing-inspection==0.4.1
