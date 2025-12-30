@@ -143,6 +143,7 @@ def add_ai_cog(bot, cog_properties):
     google_llm_model = check_and_get_property(cog_properties, "ai", "googleLLMModel")
     groq_api_key = check_and_get_property(cog_properties, "ai", "groqAPIKey")
     groq_llm_model = check_and_get_property(cog_properties, "ai", "groqLLMModel")
+    xai_api_key = check_and_get_property(cog_properties, "ai", "xaiAPIKey")
     ai_system_prompt = check_and_get_property(cog_properties, "ai", "systemPrompt")
     bot.add_cog(
         AI(
@@ -153,6 +154,7 @@ def add_ai_cog(bot, cog_properties):
             google_llm_model,
             groq_api_key,
             groq_llm_model,
+            xai_api_key,
             ai_system_prompt,
         )
     )

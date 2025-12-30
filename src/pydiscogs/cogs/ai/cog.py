@@ -1,3 +1,4 @@
+import base64
 import contextlib
 import io
 import logging
@@ -16,6 +17,7 @@ from langchain_ollama import ChatOllama
 # from .tools.computer_control import ComputerControlTool
 from .tools.url_context import UrlContextTool
 from .tools.web_research import WebResearchTool
+from .tools.xai_research import XResearchTool
 
 logger = logging.getLogger(__name__)
 
@@ -30,6 +32,7 @@ class AI(commands.Cog):
         google_llm_model: str = os.getenv("GOOGLE_LLM_MODEL"),
         groq_api_key: str = os.getenv("GROQ_API_KEY"),
         groq_llm_model: str = os.getenv("GROQ_LLM_MODEL"),
+        xai_api_key: str = os.getenv("XAI_API_KEY"),
         ai_system_prompt: str = os.getenv("AI_SYSTEM_PROMPT"),
     ):
         self.ai_handler = AIHandler(
@@ -39,6 +42,7 @@ class AI(commands.Cog):
             google_llm_model,
             groq_api_key,
             groq_llm_model,
+            xai_api_key,
             ai_system_prompt,
         )
         self.bot = bot
@@ -80,17 +84,32 @@ class AI(commands.Cog):
             raise TypeError(f"Unsupported destination type: {type(destination)}")
 
     @commands.slash_command()
-    async def ask_ai(self, ctx: discord.ApplicationContext, input: str):
+    async def ask_ai(
+        self,
+        ctx: discord.ApplicationContext,
+        input: str,
+        attachment: discord.Attachment = None,
+    ):
         await ctx.defer()
-        response = await self.ai_handler.call(input)
+        images = []
+        if (
+            attachment
+            and attachment.content_type
+            and attachment.content_type.startswith("image/")
+        ):
+            images.append((await attachment.read(), attachment.content_type))
+        response = await self.ai_handler.call(input, images=images)
+
         await self.send_response(ctx.followup, response)
 
     @commands.message_command(name="AI Reply")
     async def ai_reply(self, ctx, message: discord.Message):
+        images = await self._get_images_from_message(message)
         modal = AIReplyModal(
             title="AI Reply",
             ai_handler=self.ai_handler,
             message_content=message.content,
+            images=images,
             send_response_fn=self.send_response,
         )
         await ctx.send_modal(modal)
@@ -98,12 +117,29 @@ class AI(commands.Cog):
     @commands.command()
     async def ai(self, ctx, *, input: str):
         replied_to_message_content = None
+        images = await self._get_images_from_message(ctx.message)
+
         if ctx.message.reference:
-            replied_to_message_content = (
-                await ctx.fetch_message(ctx.message.reference.message_id)
-            ).content
-        response = await self.ai_handler.call(input, replied_to_message_content)
+            replied_to_message = await ctx.fetch_message(
+                ctx.message.reference.message_id
+            )
+            replied_to_message_content = replied_to_message.content
+            # Also check for images in the replied-to message
+            images.extend(await self._get_images_from_message(replied_to_message))
+
+        response = await self.ai_handler.call(
+            input, replied_to_message_content, images=images
+        )
         await self.send_response(ctx, response)
+
+    async def _get_images_from_message(
+        self, message: discord.Message
+    ) -> list[tuple[bytes, str]]:
+        images = []
+        for attachment in message.attachments:
+            if attachment.content_type and attachment.content_type.startswith("image/"):
+                images.append((await attachment.read(), attachment.content_type))
+        return images
 
     @commands.Cog.listener()
     async def on_message(self, message: discord.Message):
@@ -115,12 +151,18 @@ class AI(commands.Cog):
         if self.bot.user in message.mentions:
             # await message.reply("Thanks for mentioning me!")  # Reply to the message
             replied_to_message_content = None
+            images = await self._get_images_from_message(message)
+
             if message.reference:
-                replied_to_message_content = (
-                    await message.channel.fetch_message(message.reference.message_id)
-                ).content
+                replied_to_message = await message.channel.fetch_message(
+                    message.reference.message_id
+                )
+                replied_to_message_content = replied_to_message.content
+                # Also check for images in the replied-to message
+                images.extend(await self._get_images_from_message(replied_to_message))
+
             response = await self.ai_handler.call(
-                message.content, replied_to_message_content
+                message.content, replied_to_message_content, images=images
             )
             await self.send_response(message, response)
 
@@ -130,11 +172,18 @@ class AI(commands.Cog):
 
 class AIReplyModal(discord.ui.Modal):
     def __init__(
-        self, *args, ai_handler, message_content, send_response_fn, **kwargs
+        self,
+        *args,
+        ai_handler,
+        message_content,
+        images=None,
+        send_response_fn,
+        **kwargs,
     ) -> None:
         super().__init__(*args, **kwargs)
         self.ai_handler = ai_handler
         self.message_content = message_content
+        self.images = images
         self.send_response = send_response_fn
         self.add_item(
             discord.ui.InputText(label="Prompt", style=discord.InputTextStyle.long)
@@ -143,7 +192,7 @@ class AIReplyModal(discord.ui.Modal):
     async def callback(self, interaction: discord.Interaction):
         await interaction.response.defer()
         response = await self.ai_handler.call(
-            self.children[0].value, self.message_content
+            self.children[0].value, self.message_content, images=self.images
         )
         await self.send_response(interaction.followup, response)
 
@@ -157,6 +206,7 @@ class AIHandler:
         google_llm_model: str = None,
         groq_api_key: str = None,
         groq_llm_model: str = None,
+        xai_api_key: str = None,
         ai_system_prompt: str = None,
     ):
         self.ollama_endpoint = ollama_endpoint or os.getenv("OLLAMA_ENDPOINT")
@@ -165,6 +215,7 @@ class AIHandler:
         self.google_llm_model = google_llm_model or os.getenv("GOOGLE_LLM_MODEL")
         self.groq_api_key = groq_api_key or os.getenv("GROQ_API_KEY")
         self.groq_llm_model = groq_llm_model or os.getenv("GROQ_LLM_MODEL")
+        self.xai_api_key = xai_api_key or os.getenv("XAI_API_KEY")
         self.ai_system_prompt = ai_system_prompt or os.getenv("AI_SYSTEM_PROMPT")
 
         if not any([self.ollama_endpoint, self.groq_api_key, self.google_api_key]):
@@ -176,15 +227,34 @@ class AIHandler:
 
         self.__setupLLMs()
 
-    async def call(self, input: str, replied_to_message_content: str = ""):
-        messages = {
-            "messages": [
-                HumanMessage(
-                    content=f"previous message being replied to: {replied_to_message_content}"
-                ),
-                HumanMessage(content=input),
-            ]
-        }
+    async def call(
+        self,
+        input: str,
+        replied_to_message_content: str = "",
+        images: list[tuple[bytes, str]] = None,
+    ):
+        content = []
+        if replied_to_message_content:
+            content.append(
+                {
+                    "type": "text",
+                    "text": f"previous message being replied to: {replied_to_message_content}",
+                }
+            )
+
+        content.append({"type": "text", "text": input})
+
+        if images:
+            for image_bytes, content_type in images:
+                encoded = base64.b64encode(image_bytes).decode("utf-8")
+                content.append(
+                    {
+                        "type": "image_url",
+                        "image_url": f"data:{content_type};base64,{encoded}",
+                    }
+                )
+
+        messages = {"messages": [HumanMessage(content=content)]}
 
         try:
             async for step in self.current_agent.astream(
@@ -192,8 +262,13 @@ class AIHandler:
                 stream_mode="values",
             ):
                 response = step["messages"][-1]
-                logger.debug("\n" + self.__get_pretty_print_response_string(response))
-            logger.info(f"response: {response}")
+                logger.debug(
+                    "\n"
+                    + self.__get_pretty_print_response_string(
+                        self.__sanitize_message(response)
+                    )
+                )
+            logger.info(f"response: {self.__sanitize_message(response)}")
             final_content = response.content
             if isinstance(final_content, list):
                 return final_content[0].get(
@@ -212,7 +287,10 @@ class AIHandler:
                 ):
                     response = step["messages"][-1]
                     logger.debug(
-                        "\n" + self.__get_pretty_print_response_string(response)
+                        "\n"
+                        + self.__get_pretty_print_response_string(
+                            self.__sanitize_message(response)
+                        )
                     )
                 final_content = response.content
                 if isinstance(final_content, list):
@@ -301,12 +379,12 @@ class AIHandler:
                         google_api_key=self.google_api_key,
                         google_llm_model=self.google_llm_model,
                     ),
-                    # Commenting for now. Tool is currently not stable or affordable.
-                    # ComputerControlTool(
-                    #     google_api_key=self.google_api_key,
-                    # ),
                 ]
             )
+
+        if self.xai_api_key:
+            tools.append(XResearchTool(xai_api_key=self.xai_api_key))
+
         return tools
 
     def __get_pretty_print_response_string(self, response):
@@ -317,3 +395,27 @@ class AIHandler:
             pretty_output = buf.getvalue()
 
         return pretty_output
+
+    def __sanitize_message(self, message):
+        """Sanitize message for logging by truncating large base64 image data."""
+        import copy
+
+        if not isinstance(message.content, list):
+            return message
+
+        sanitized_content = []
+        for item in message.content:
+            if isinstance(item, dict) and item.get("type") == "image_url":
+                # Create a copy and truncate the base64 data
+                new_item = copy.deepcopy(item)
+                image_url = new_item.get("image_url", "")
+                if ";base64," in image_url:
+                    parts = image_url.split(";base64,")
+                    new_item["image_url"] = parts[0] + ";base64,...[TRUNCATED]"
+                sanitized_content.append(new_item)
+            else:
+                sanitized_content.append(item)
+
+        sanitized_message = copy.copy(message)
+        sanitized_message.content = sanitized_content
+        return sanitized_message

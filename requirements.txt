@@ -12,6 +12,7 @@ aiohttp==3.12.15
     #   asyncprawcore
     #   py-cord
     #   twitchio
+    #   xai-sdk
 aiosignal==1.4.0
     # via aiohttp
 aiosqlite==0.17.0
@@ -206,8 +207,10 @@ greenlet==3.2.4
     # via
     #   pydiscogs (pyproject.toml)
     #   playwright
-groq==0.31.1
-    # via langchain-groq
+groq==0.37.1
+    # via
+    #   pydiscogs (pyproject.toml)
+    #   langchain-groq
 grpc-google-iam-v1==0.14.3
     # via
     #   google-cloud-bigtable
@@ -231,6 +234,7 @@ grpcio==1.74.0
     #   grpc-google-iam-v1
     #   grpc-interceptor
     #   grpcio-status
+    #   xai-sdk
 grpcio-status==1.71.2
     # via google-api-core
 h11==0.16.0
@@ -269,9 +273,9 @@ jsonschema==4.25.1
     # via mcp
 jsonschema-specifications==2025.9.1
     # via jsonschema
-langchain==1.0.3
+langchain==1.2.0
     # via pydiscogs (pyproject.toml)
-langchain-core==1.0.2
+langchain-core==1.2.5
     # via
     #   pydiscogs (pyproject.toml)
     #   langchain
@@ -283,11 +287,11 @@ langchain-core==1.0.2
     #   langgraph-prebuilt
 langchain-google-genai==3.0.0
     # via pydiscogs (pyproject.toml)
-langchain-groq==1.0.0
+langchain-groq==1.1.1
     # via pydiscogs (pyproject.toml)
 langchain-ollama==1.0.0
     # via pydiscogs (pyproject.toml)
-langgraph==1.0.2
+langgraph==1.0.5
     # via
     #   pydiscogs (pyproject.toml)
     #   langchain
@@ -300,7 +304,7 @@ langgraph-prebuilt==1.0.2
     # via
     #   pydiscogs (pyproject.toml)
     #   langgraph
-langgraph-sdk==0.2.9
+langgraph-sdk==0.3.1
     # via
     #   pydiscogs (pyproject.toml)
     #   langgraph
@@ -327,6 +331,8 @@ numpy==2.3.2
     #   pandas
     #   shapely
     #   yfinance
+oauthlib==3.3.1
+    # via requests-oauthlib
 ollama==0.6.0
     # via
     #   pydiscogs (pyproject.toml)
@@ -377,6 +383,7 @@ opentelemetry-sdk==1.37.0
     #   opentelemetry-exporter-gcp-trace
     #   opentelemetry-exporter-otlp-proto-http
     #   opentelemetry-resourcedetector-gcp
+    #   xai-sdk
 opentelemetry-semantic-conventions==0.58b0
     # via opentelemetry-sdk
 orjson==3.11.3
@@ -391,6 +398,7 @@ packaging==25.0
     #   google-cloud-bigquery
     #   langchain-core
     #   langsmith
+    #   xai-sdk
 pandas==2.3.2
     # via yfinance
 peewee==3.18.2
@@ -443,6 +451,7 @@ protobuf==5.29.5
     #   grpcio-status
     #   opentelemetry-proto
     #   proto-plus
+    #   xai-sdk
     #   yfinance
 py-cord==2.6.1
     # via pydiscogs (pyproject.toml)
@@ -471,6 +480,8 @@ pydantic==2.11.7
     #   mcp
     #   ollama
     #   pydantic-settings
+    #   xai-sdk
+    #   xdk
 pydantic-core==2.33.2
     # via pydantic
 pydantic-settings==2.12.0
@@ -517,9 +528,14 @@ requests==2.32.5
     #   langsmith
     #   opentelemetry-exporter-otlp-proto-http
     #   opentelemetry-resourcedetector-gcp
+    #   requests-oauthlib
     #   requests-toolbelt
     #   update-checker
+    #   xai-sdk
+    #   xdk
     #   yfinance
+requests-oauthlib==2.0.0
+    # via xdk
 requests-toolbelt==1.0.0
     # via langsmith
 rpds-py==0.29.0
@@ -602,6 +618,8 @@ urllib3==2.5.0
     # via
     #   polygon-api-client
     #   requests
+uuid-utils==0.12.0
+    # via langchain-core
 uvicorn==0.38.0
     # via
     #   google-adk
@@ -616,6 +634,10 @@ websockets==15.0.1
     #   google-genai
     #   polygon-api-client
     #   yfinance
+xai-sdk==1.5.0
+    # via pydiscogs (pyproject.toml)
+xdk==0.5.0
+    # via pydiscogs (pyproject.toml)
 xvfbwrapper==0.2.9
     # via pydiscogs (pyproject.toml)
 xxhash==3.5.0

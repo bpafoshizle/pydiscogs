@@ -1,23 +1,23 @@
 [project]
 name = "pydiscogs"
-version = "0.5.1"
+version = "0.5.2"
 description = "A collection of cogs that can be used to add functionality to a Discord.py bot"
 readme = "README.md"
-requires-python = ">=3.13"
+requires-python = "==3.13.1"
 dependencies = [
     "asyncpraw==7.8.1",
     "audioop-lts>=0.2.1",
     "duckduckgo-search==7.5.5",
     "google-genai==1.52.0",
-    "langchain==1.0.3",
-    "langchain-core==1.0.2",
+    "langchain==1.2.0",
+    "langchain-core==1.2.5",
     "langchain-google-genai==3.0.0",
-    "langchain-groq==1.0.0",
+    "langchain-groq==1.1.1",
     "langchain-ollama==1.0.0",
-    "langgraph==1.0.2",
-    "langgraph-checkpoint==3.0.0",
-    "langgraph-prebuilt==1.0.2",
-    "langgraph-sdk==0.2.9",
+    "langgraph==1.0.5",
+    "langgraph-checkpoint",
+    "langgraph-prebuilt",
+    "langgraph-sdk",
     "langsmith==0.4.39",
     "ollama==0.6.0",
     "polygon-api-client==1.16.3",
@@ -33,7 +33,10 @@ dependencies = [
     "yfinance==0.2.63",
     "zstandard==0.25.0",
     "uvloop",
-    "termcolor"
+    "termcolor",
+    "xdk>=0.2.7b0",
+    "xai-sdk>=1.3.1",
+    "groq>=0.37.1",
 ]
 
 [build-system]
