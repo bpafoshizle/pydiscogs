@@ -11,11 +11,12 @@ dependencies = [
     "google-genai==1.52.0",
     "langchain==1.2.0",
     "langchain-core==1.2.5",
-    "langchain-google-genai==3.0.0",
+    "langchain-google-genai>=3.1.0",
     "langchain-groq==1.1.1",
     "langchain-ollama==1.0.0",
     "langgraph==1.0.5",
-    "langgraph-checkpoint",
+    "langgraph-checkpoint-postgres",
+    "psycopg[binary]",
     "langgraph-prebuilt",
     "langgraph-sdk",
     "langsmith==0.4.39",
@@ -60,7 +61,7 @@ line-length = 88
 [tool.flake8]
 max-line-length = 88
 ignore = ["E501", "W503"]
-exclude = ["news.py", "prompts.py", "venv/*"]
+exclude = ["news.py", "prompts.py", "venv/*", "build/*", ".venv/*"]
 
 [tool.poetry.scripts]
 activate = "source .venv/bin/activate"
@@ -70,6 +71,7 @@ dev = [
     "black>=25.1.0",
     "flake8>=7.3.0",
     "isort>=6.0.1",
+    "flake8-pyproject",
 ]
 
 
