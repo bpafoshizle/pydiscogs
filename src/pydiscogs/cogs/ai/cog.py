@@ -339,12 +339,12 @@ class AIHandler:
 
             # Initialize embeddings for semantic search
             embeddings = GoogleGenerativeAIEmbeddings(
-                model="models/text-embedding-004",
+                model="models/gemini-embedding-001",
                 google_api_key=self.google_api_key,
             )
 
             # Configure store with vector index
-            index_config = IndexConfig(dims=768, embed=embeddings, fields=["data"])
+            index_config = IndexConfig(dims=3072, embed=embeddings, fields=["data"])
 
             self.store = AsyncPostgresStore(self.pool, index=index_config)
             await self.store.setup()
