@@ -218,8 +218,14 @@ class AI(commands.Cog):
             )
             await self.send_response(message, response)
 
-        # Allow other listeners and commands to process the message
-        # await self.bot.process_commands(message)
+    @commands.Cog.listener()
+    async def on_ready(self):
+        """Called when the bot is ready. Initializes the AI handler."""
+        logger.info("AI cog: bot is ready, initializing AI handler...")
+        await self.ai_handler.initialize()
+
+    # Allow other listeners and commands to process the message
+    # await self.bot.process_commands(message)
 
 
 class AIReplyModal(discord.ui.Modal):
@@ -301,19 +307,18 @@ class AIHandler:
 
         self.__setupLLMs()
 
-    async def call(
-        self,
-        input: str,
-        images: list[tuple[bytes, str]] = None,
-        thread_id: str = "default",
-        user_id: str = "default_user",
-        guild_id: str = None,
-        channel_id: str = None,
-    ):
-        logger.debug(
-            f"AIHandler.call invoked. Store is not None: {self.store is not None}"
-        )
-        if self.postgres_url and not self.checkpointer:
+    async def initialize(self):
+        """Initializes the Postgres connection, checkpointer, and store."""
+        if not self.postgres_url:
+            logger.warning("AIHandler: No POSTGRES_DB_URL found. Persistence disabled.")
+            return
+
+        if self.checkpointer:
+            logger.debug("AIHandler: Already initialized.")
+            return
+
+        logger.info("AIHandler: Initializing Postgres connection and tables...")
+        try:
             from langgraph.checkpoint.postgres.aio import AsyncPostgresSaver
             from langgraph.store.postgres.aio import AsyncPostgresStore
             from psycopg_pool import AsyncConnectionPool
@@ -349,8 +354,31 @@ class AIHandler:
 
             # Re-initialize agent with checkpointer and store
             self.__setupLLMs()
+        except Exception as e:
+            logger.error(
+                f"AIHandler: Failed to initialize Postgres: {e}", exc_info=True
+            )
+            self.checkpointer = None
+            self.store = None
+            if self.pool:
+                await self.pool.close()
+                self.pool = None
 
-        content = []
+    async def call(
+        self,
+        input: str,
+        images: list[tuple[bytes, str]] = None,
+        thread_id: str = "default",
+        user_id: str = "default_user",
+        guild_id: str = None,
+        channel_id: str = None,
+    ):
+        logger.debug(
+            f"AIHandler.call invoked. Store is not None: {self.store is not None}"
+        )
+        if self.postgres_url and not self.checkpointer:
+            await self.initialize()
+
         content = []
         content.append({"type": "text", "text": input})
 
