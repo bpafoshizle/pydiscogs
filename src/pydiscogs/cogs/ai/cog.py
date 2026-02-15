@@ -24,6 +24,24 @@ from .tools.xai_research import XResearchTool
 logger = logging.getLogger(__name__)
 
 
+class GoogleGenerativeAIEmbeddingsWithDims(GoogleGenerativeAIEmbeddings):
+    def embed_documents(self, texts, **kwargs):
+        # Force dims to 768 to avoid HNSW limit (2000)
+        return super().embed_documents(texts, output_dimensionality=768)
+
+    def embed_query(self, text, **kwargs):
+        # Force dims to 768 to avoid HNSW limit (2000)
+        return super().embed_query(text, output_dimensionality=768)
+
+    async def aembed_documents(self, texts, **kwargs):
+        # Force dims to 768 to avoid HNSW limit (2000)
+        return await super().aembed_documents(texts, output_dimensionality=768)
+
+    async def aembed_query(self, text, **kwargs):
+        # Force dims to 768 to avoid HNSW limit (2000)
+        return await super().aembed_query(text, output_dimensionality=768)
+
+
 class AI(commands.Cog):
     def __init__(
         self,
@@ -338,13 +356,13 @@ class AIHandler:
             await self.checkpointer.setup()
 
             # Initialize embeddings for semantic search
-            embeddings = GoogleGenerativeAIEmbeddings(
+            embeddings = GoogleGenerativeAIEmbeddingsWithDims(
                 model="models/gemini-embedding-001",
                 google_api_key=self.google_api_key,
             )
 
             # Configure store with vector index
-            index_config = IndexConfig(dims=3072, embed=embeddings, fields=["data"])
+            index_config = IndexConfig(dims=768, embed=embeddings, fields=["data"])
 
             self.store = AsyncPostgresStore(self.pool, index=index_config)
             await self.store.setup()
